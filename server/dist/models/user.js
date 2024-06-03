@@ -42,6 +42,11 @@ const userSchema = new mongoose_1.Schema({
         required: true,
         trim: true,
     },
+    specialty: {
+        type: String,
+        required: true,
+        trim: true,
+    },
     profileImg: {
         type: String,
         required: false,

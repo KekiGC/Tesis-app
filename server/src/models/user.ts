@@ -7,6 +7,7 @@ export interface IUser extends Document {
   password: string;
   name: string;
   lastname: string;
+  specialty: string;
   profileImg: string | null;
   comparePassword: (password: string) => Promise<boolean>;
 }
@@ -36,6 +37,11 @@ const userSchema = new Schema(
       trim: true,
     },
     lastname: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    specialty: {
       type: String,
       required: true,
       trim: true,

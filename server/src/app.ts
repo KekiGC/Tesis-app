@@ -5,6 +5,8 @@ import passport from "passport";
 import passportMiddleware from "./middlewares/passport";
 import authRoutes from "./routes/auth.routes";
 import specialRoutes from "./routes/special.routes";
+import patientRoutes from "./routes/patient.routes";
+import medicalRecordRoutes from "./routes/medicalRecord.routes";
 
 //inicio
 const app = express();
@@ -27,5 +29,7 @@ app.get("/", (req, res) => {
 
 app.use(authRoutes);
 app.use(specialRoutes);
+app.use(patientRoutes);
+app.use(medicalRecordRoutes);
 
 export default app;
