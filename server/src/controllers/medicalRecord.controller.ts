@@ -19,30 +19,30 @@ export const getMedicalRecords = async (req: Request, res: Response): Promise<Re
 };
 
 // obtener una historia clinica por su id
-export const getMedicalRecord = async (req: Request, res: Response): Promise<Response> => {
-  const { id } = req.params;
+// export const getMedicalRecord = async (req: Request, res: Response): Promise<Response> => {
+//   const { id } = req.params;
 
-  if (!id) {
-    return res.status(400).json({ msg: 'Please provide an id' });
-  }
+//   if (!id) {
+//     return res.status(400).json({ msg: 'Please provide an id' });
+//   }
 
-  try {
-    const medicalRecord = await MedicalRecord.findById(id);
+//   try {
+//     const medicalRecord = await MedicalRecord.findById(id);
 
-    if (!medicalRecord) {
-      return res.status(404).json({ msg: 'Medical record not found' });
-    }
+//     if (!medicalRecord) {
+//       return res.status(404).json({ msg: 'Medical record not found' });
+//     }
 
-    return res.status(200).json(medicalRecord);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ msg: 'Internal server error' });
-  }
-};
+//     return res.status(200).json(medicalRecord);
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({ msg: 'Internal server error' });
+//   }
+// };
 
 // crear una historia clinica de un paciente
 export const createMedicalRecord = async (req: Request, res: Response): Promise<Response> => {
-  const { patientId, observaciones, ant_personales, ant_familiares, alergias, vacunas, medicamentos, enf_cronicas } = req.body;
+  const { patientId, observaciones, ant_personales, ant_familiares, alergias, vacunas, medicamentos, enf_cronicas, empresa, grupoSanguineo } = req.body;
 
   try {
     if (!patientId) {

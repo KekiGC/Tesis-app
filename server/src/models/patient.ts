@@ -11,6 +11,8 @@ export interface IPatient extends Document {
   birthdate: Date;
   phone: string;
   address: string;
+  empresa: string;
+  grupoSanguineo: string;
 }
 
 const patientSchema = new Schema({
@@ -58,6 +60,17 @@ const patientSchema = new Schema({
     },
     address: {
         type: String,
+        required: true,
+        trim: true,
+    },
+    empresa: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    grupoSanguineo: {
+        type: String,
+        enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
         required: true,
         trim: true,
     },

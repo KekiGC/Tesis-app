@@ -4,8 +4,10 @@ import { IPatient } from './patient';
 export interface IMedicalRecord extends Document {
   patientId: IPatient['_id'];
   observaciones: string;
-  ant_personales: string;
+  ant_medicos: string;
   ant_familiares: string;
+  ant_laborales: string;
+  habitos: string;
   alergias: string;
   vacunas: string;
   medicamentos: string;
@@ -23,12 +25,22 @@ const medicalRecordSchema = new Schema({
     required: false,
     trim: true,
   },
-  ant_personales: {
+  ant_medicos: {
     type: String,
     required: false,
     trim: true,
   },
   ant_familiares: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+  ant_laborales: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+  habitos: {
     type: String,
     required: false,
     trim: true,
