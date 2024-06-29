@@ -6,8 +6,8 @@ export interface IAppointment extends Document {
   patientId: IPatient['_id'];
   doctorId: IUser['_id'];
   date: Date;
+  time: string;
   status: string;
-  notes: string;
   motive: string;
 }
 
@@ -26,16 +26,16 @@ const appointmentSchema = new Schema({
     type: Date,
     required: true,
   },
+  time: {
+    type: String,
+    required: true,
+    trim: true
+  },
   status: {
     type: String,
     enum: ['pending', 'completed', 'cancelled'],
     default: 'pending',
     required: true,
-    trim: true,
-  },
-  notes: {
-    type: String,
-    required: false,
     trim: true,
   },
   motive: {
