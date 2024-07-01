@@ -12,12 +12,22 @@ const medicalRecordSchema = new mongoose_1.Schema({
         required: false,
         trim: true,
     },
-    ant_personales: {
+    ant_medicos: {
         type: String,
         required: false,
         trim: true,
     },
     ant_familiares: {
+        type: String,
+        required: false,
+        trim: true,
+    },
+    ant_laborales: {
+        type: String,
+        required: false,
+        trim: true,
+    },
+    habitos: {
         type: String,
         required: false,
         trim: true,

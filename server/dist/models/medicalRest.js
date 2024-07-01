@@ -1,20 +1,9 @@
-import { model, Schema, Document } from 'mongoose';
-import { IPatient } from './patient';
-
-export interface IMedicalRest extends Document {
-    patientId: IPatient['_id'];
-    nombre_paciente: string;
-    cedula_paciente: string;
-    sintomas: string;
-    fecha: Date;
-    diagnostico: string;
-    fecha_inicio: Date;
-    fecha_final: Date;
-}
-
-const medicalRestSchema = new Schema({
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const mongoose_1 = require("mongoose");
+const medicalRestSchema = new mongoose_1.Schema({
     patientId: {
-        type: Schema.Types.ObjectId,
+        type: mongoose_1.Schema.Types.ObjectId,
         ref: 'Patient',
         required: true,
     },
@@ -51,5 +40,4 @@ const medicalRestSchema = new Schema({
         required: true,
     },
 });
-
-export default model<IMedicalRest>('MedicalRest', medicalRestSchema);
+exports.default = (0, mongoose_1.model)('MedicalRest', medicalRestSchema);

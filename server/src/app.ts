@@ -8,7 +8,7 @@ import specialRoutes from "./routes/special.routes";
 import patientRoutes from "./routes/patient.routes";
 import medicalRecordRoutes from "./routes/medicalRecord.routes";
 import appointmentRoutes from "./routes/appointment.routes";
-
+import pdfroutes from "./routes/pdf.routes";
 //inicio
 const app = express();
 
@@ -33,5 +33,7 @@ app.use(specialRoutes);
 app.use(patientRoutes);
 app.use(medicalRecordRoutes);
 app.use(appointmentRoutes);
+app.use(pdfroutes);
+
 
 export default app;

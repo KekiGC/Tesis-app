@@ -13,6 +13,7 @@ const special_routes_1 = __importDefault(require("./routes/special.routes"));
 const patient_routes_1 = __importDefault(require("./routes/patient.routes"));
 const medicalRecord_routes_1 = __importDefault(require("./routes/medicalRecord.routes"));
 const appointment_routes_1 = __importDefault(require("./routes/appointment.routes"));
+const pdf_routes_1 = __importDefault(require("./routes/pdf.routes"));
 //inicio
 const app = (0, express_1.default)();
 //configuraciones
@@ -33,4 +34,5 @@ app.use(special_routes_1.default);
 app.use(patient_routes_1.default);
 app.use(medicalRecord_routes_1.default);
 app.use(appointment_routes_1.default);
+app.use(pdf_routes_1.default);
 exports.default = app;

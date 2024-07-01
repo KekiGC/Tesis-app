@@ -1,36 +1,43 @@
-import { jsPDF } from "jspdf";
+// server/src/controllers/pdfcreator.controller.ts
 
-interface DatosMedicos {
-    nombrePaciente: string;
-    cedulaPaciente: string;
-    sintomas: string;
-    fecha: Date;
-    fechaInicio: Date;
-    fechaFinal: Date;
-}
+import { Request, Response } from 'express';
+import { generarPDF, IMedicalRestPDFData } from '../helpers/pdfGenerator';
+import { IMedicalRest } from '../models/medicalRest';
 
-const generarPDF = ({ nombrePaciente, cedulaPaciente, sintomas, fecha, fechaInicio, fechaFinal }: DatosMedicos): Buffer => {
-    const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.setFont("Courier", "bold");
-    doc.text("SENIAT", 90, 10);
-    doc.setFont("Courier", "normal");
-    doc.text("BillMaster. C.A.", 78, 20);
-    doc.text("billmaster calle 123", 68, 30);
-    doc.text("Tierra Negra, Mcbo, Edo. Zulia", 53, 40);
+const createMedicalRestPDF = (req: Request, res: Response): void => {
+    const {
+        patientId,
+        nombre_paciente,
+        cedula_paciente,
+        sintomas,
+        fecha,
+        diagnostico,
+        fecha_inicio,
+        fecha_final
+    }: IMedicalRest = req.body;
 
-    doc.setFontSize(13);
-    doc.text("Fecha: " + fecha, 10, 50);
-    doc.text("------------------ INFORMACION DEL PACIENTE ------------------", 10, 65);
-    doc.text("NOMBRE DEL PACIENTE: " + nombrePaciente, 10, 75);
-    doc.text("CEDULA: " + cedulaPaciente, 10, 85);
-    doc.text("SINTOMAS PRESENTADOS: " + sintomas, 10, 95);
-    doc.text("Fecha Inicio de Reposo: " + fechaInicio, 10, 50);
-    doc.text("Fecha: Finalizacion de Reposo" + fechaFinal, 10, 50);
+    try {
+        const pdfData: IMedicalRestPDFData = {
+            patientId: String(patientId),  // Convertimos a string
+            nombre_paciente,
+            cedula_paciente,
+            sintomas,
+            fecha,
+            diagnostico,
+            fecha_inicio,
+            fecha_final
+        };
 
-    // Convert the PDF to a Buffer
-    const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
-    return pdfBuffer;
+        const pdfBuffer = generarPDF(pdfData);
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename=medicalRest.pdf');
+        res.send(pdfBuffer);
+    } catch (error) {
+        res.status(500).send({ message: 'Error generating PDF', error });
+    }
 };
 
-export { generarPDF, DatosMedicos };
+export const PdfcreatorController = {
+    createMedicalRestPDF
+};
