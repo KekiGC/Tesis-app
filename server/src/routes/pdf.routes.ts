@@ -1,3 +1,4 @@
+/*
 // server/src/routes/pdf.routes.ts
 
 import express from 'express';
@@ -7,4 +8,4 @@ const router = express.Router();
 
 router.post('/createPDF', PdfcreatorController.createMedicalRestPDF);
 
-export default router;
+export default router;*/

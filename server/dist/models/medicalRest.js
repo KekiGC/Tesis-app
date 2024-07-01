@@ -7,12 +7,12 @@ const medicalRestSchema = new mongoose_1.Schema({
         ref: 'Patient',
         required: true,
     },
-    name: {
+    nombre_paciente: {
         type: String,
         required: true,
         trim: true,
     },
-    cedula: {
+    cedula_paciente: {
         type: String,
         required: true,
         trim: true,
@@ -22,7 +22,7 @@ const medicalRestSchema = new mongoose_1.Schema({
         required: true,
         trim: true,
     },
-    fecha_reporte: {
+    fecha: {
         type: Date,
         required: true,
     },
@@ -35,7 +35,7 @@ const medicalRestSchema = new mongoose_1.Schema({
         type: Date,
         required: true,
     },
-    fecha_fin: {
+    fecha_final: {
         type: Date,
         required: true,
     },

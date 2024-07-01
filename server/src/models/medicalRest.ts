@@ -18,12 +18,12 @@ const medicalRestSchema = new Schema({
         ref: 'Patient',
         required: true,
     },
-    name: {
+    nombre_paciente: {
         type: String,
         required: true,
         trim: true,
     },
-    cedula: {
+    cedula_paciente: {
         type: String,
         required: true,
         trim: true,
@@ -33,7 +33,7 @@ const medicalRestSchema = new Schema({
         required: true,
         trim: true,
     },
-    fecha_reporte: {
+    fecha: {
         type: Date,
         required: true,
     },
@@ -46,7 +46,7 @@ const medicalRestSchema = new Schema({
         type: Date,
         required: true,
     },
-    fecha_fin: {
+    fecha_final: {
         type: Date,
         required: true,
     },
