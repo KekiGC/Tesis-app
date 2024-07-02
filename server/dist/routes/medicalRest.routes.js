@@ -19,4 +19,6 @@ router.get('/get-medical-rest-by-patientid/:patientId', medicalRest_controller_1
 router.put('/update-medical-rest', medicalRest_controller_1.updateMedicalRest); //
 // Ruta para eliminar un reporte médico
 router.delete('/delete-medical-rest/:id', medicalRest_controller_1.deleteMedicalRest); //
+// Ruta para generar un PDF basado en datos de medical rest
+router.post('/create-medical-rest-pdf', medicalRest_controller_1.createMedicalRestPDFRoute); //
 exports.default = router;

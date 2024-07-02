@@ -6,10 +6,11 @@ export interface IMedicalRest extends Document {
     nombre_paciente: string;
     cedula_paciente: string;
     sintomas: string;
-    fecha: Date;
+    fecha: string;
     diagnostico: string;
-    fecha_inicio: Date;
-    fecha_final: Date;
+    fecha_inicio: string;
+    fecha_final: string;
+    comentarios: string | null;
 }
 
 const medicalRestSchema = new Schema({
@@ -34,7 +35,7 @@ const medicalRestSchema = new Schema({
         trim: true,
     },
     fecha: {
-        type: Date,
+        type: String,
         required: true,
     },
     diagnostico: {
@@ -43,12 +44,16 @@ const medicalRestSchema = new Schema({
         trim: true,
     },
     fecha_inicio: {
-        type: Date,
+        type: String,
         required: true,
     },
     fecha_final: {
-        type: Date,
+        type: String,
         required: true,
+    },
+    comentarios: {
+        type: String,
+        required: false,
     },
 });
 

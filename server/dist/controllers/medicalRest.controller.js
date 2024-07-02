@@ -12,15 +12,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteMedicalRest = exports.updateMedicalRest = exports.getMedicalReportsByPatientId = exports.getMedicalRestById = exports.getAllMedicalRests = exports.createMedicalRest = void 0;
+exports.createMedicalRestPDFRoute = exports.deleteMedicalRest = exports.updateMedicalRest = exports.getMedicalReportsByPatientId = exports.getMedicalRestById = exports.getAllMedicalRests = exports.createMedicalRest = void 0;
 const mongoose_1 = require("mongoose");
 const medicalRest_1 = __importDefault(require("../models/medicalRest"));
-//crear un nuevo reporte médico
+const pdfGenerator_1 = require("../helpers/pdfGenerator");
 // crear un nuevo reporte médico
 const createMedicalRest = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { patientId, nombre_paciente, cedula_paciente, sintomas, fecha, diagnostico, fecha_inicio, fecha_final } = req.body;
+    const { patientId, nombre_paciente, cedula_paciente, sintomas, fecha, diagnostico, fecha_inicio, fecha_final, comentarios = '' } = req.body;
     if (!patientId || !nombre_paciente || !cedula_paciente || !sintomas || !fecha || !diagnostico || !fecha_inicio || !fecha_final) {
-        return res.status(400).json({ msg: 'Please provide all fields' });
+        return res.status(400).json({ msg: 'Please provide all required fields' });
     }
     try {
         const newMedicalRest = new medicalRest_1.default({
@@ -32,6 +32,7 @@ const createMedicalRest = (req, res) => __awaiter(void 0, void 0, void 0, functi
             diagnostico,
             fecha_inicio,
             fecha_final,
+            comentarios,
         });
         const savedMedicalRest = yield newMedicalRest.save();
         return res.status(201).json(savedMedicalRest);
@@ -102,7 +103,7 @@ exports.getMedicalReportsByPatientId = getMedicalReportsByPatientId;
 // actualizar un reporte médico
 const updateMedicalRest = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { id, patientId, nombre_paciente, cedula_paciente, sintomas, fecha, diagnostico, fecha_inicio, fecha_final } = req.body;
+        const { id, patientId, nombre_paciente, cedula_paciente, sintomas, fecha, diagnostico, fecha_inicio, fecha_final, comentarios } = req.body;
         // Validar que se haya enviado un ID válido
         if (!id) {
             return res.status(400).json({ error: 'ID del registro médico es requerido' });
@@ -121,6 +122,7 @@ const updateMedicalRest = (req, res) => __awaiter(void 0, void 0, void 0, functi
         medicalRest.diagnostico = diagnostico;
         medicalRest.fecha_inicio = fecha_inicio;
         medicalRest.fecha_final = fecha_final;
+        medicalRest.comentarios = comentarios;
         // Guardar los cambios en la base de datos
         yield medicalRest.save();
         return res.status(200).json(medicalRest);
@@ -147,43 +149,32 @@ const deleteMedicalRest = (req, res) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 exports.deleteMedicalRest = deleteMedicalRest;
-/*
 //crar pdf de medical rest
-
-export const createMedicalRestPDF = async (medicalRest: IMedicalRest) => {
-  try {
-    const { patientId, nombre_paciente, cedula_paciente, sintomas, fecha, diagnostico, fecha_inicio, fecha_final } = medicalRest;
-
-    // Crear un nuevo documento PDF
-    const doc = await pdf.PDFDocument.create();
-
-    // Agregar una página al documento
-    const page = await doc.addPage();
-
-    // Escribir el contenido del reporte médico en el PDF
-    const font = await doc.embedFont(pdf.StandardFonts.Helvetica);
-    const { width, height } = page.getSize();
-
-    let y = height - 50;
-    page.drawText(`Nombre del paciente: ${nombre_paciente}`, { x: 50, y, font, size: 12 });
-    y -= 20;
-    page.drawText(`Cédula del paciente: ${cedula_paciente}`, { x: 50, y, font, size: 12 });
-    y -= 20;
-    page.drawText(`Fecha: ${fecha}`, { x: 50, y, font, size: 12 });
-    y -= 20;
-    page.drawText(`Síntomas: ${sintomas}`, { x: 50, y, font, size: 12 });
-    y -= 20;
-    page.drawText(`Diagnóstico: ${diagnostico}`, { x: 50, y, font, size: 12 });
-    y -= 20;
-    page.drawText(`Fecha de inicio: ${fecha_inicio}`, { x: 50, y, font, size: 12 });
-    y -= 20;
-    page.drawText(`Fecha final: ${fecha_final}`, { x: 50, y, font, size: 12 });
-
-    // Guardar el documento PDF
-    const pdfBytes = await doc.save();
-    return pdfBytes;
-  } catch (error) {
-    console.error('Error al crear el PDF:', error);
-    throw error;
-  }
-};*/ 
+const createMedicalRestPDFRoute = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { patientId, nombre_paciente, cedula_paciente, sintomas, fecha, diagnostico, fecha_inicio, fecha_final, comentarios = '' } = req.body;
+    if (!patientId || !nombre_paciente || !cedula_paciente || !sintomas || !fecha || !diagnostico || !fecha_inicio || !fecha_final) {
+        res.status(400).json({ msg: 'Please provide all required fields' });
+        return;
+    }
+    try {
+        const pdfData = {
+            patientId: String(patientId),
+            nombre_paciente,
+            cedula_paciente,
+            sintomas,
+            fecha: fecha.toString(), // Convertir fecha a string
+            diagnostico,
+            fecha_inicio: fecha_inicio.toString(), // Convertir fecha_inicio a string
+            fecha_final: fecha_final.toString(), // Convertir fecha_final a string
+            comentarios: comentarios || '',
+        };
+        const pdfBuffer = (0, pdfGenerator_1.createMedicalRestPDF)(pdfData);
+        res.setHeader('Content-Type', 'application/pdf');
+        res.send(pdfBuffer);
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ msg: 'Error generating PDF' });
+    }
+});
+exports.createMedicalRestPDFRoute = createMedicalRestPDFRoute;

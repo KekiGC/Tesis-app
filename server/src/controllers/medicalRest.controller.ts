@@ -1,44 +1,50 @@
 import { Request, Response } from 'express';
 import { Error } from 'mongoose';
 import MedicalRest, { IMedicalRest } from '../models/medicalRest';
+import { createMedicalRestPDF, IMedicalRestPDFData } from '../helpers/pdfGenerator';
 
-import { createMedicalRestPDF } from '../helpers/pdfGenerator';
-//crear un nuevo reporte médico
+
+
 // crear un nuevo reporte médico
 export const createMedicalRest = async (req: Request, res: Response): Promise<Response> => {
-  const { patientId, nombre_paciente, cedula_paciente, sintomas, fecha, diagnostico, fecha_inicio, fecha_final } = req.body;
-  
+  const { patientId, nombre_paciente, cedula_paciente, sintomas, fecha, diagnostico, fecha_inicio, fecha_final, comentarios = '' } = req.body;
+
   if (!patientId || !nombre_paciente || !cedula_paciente || !sintomas || !fecha || !diagnostico || !fecha_inicio || !fecha_final) {
-  return res.status(400).json({ msg: 'Please provide all fields' });
+    return res.status(400).json({ msg: 'Please provide all required fields' });
   }
-  
+
   try {
-  const newMedicalRest: IMedicalRest = new MedicalRest({
-  patientId,
-  nombre_paciente,
-  cedula_paciente,
-  sintomas,
-  fecha,
-  diagnostico,
-  fecha_inicio,
-  fecha_final,
-  });
-  
-  const savedMedicalRest: IMedicalRest = await newMedicalRest.save();
-  return res.status(201).json(savedMedicalRest);
+    const newMedicalRest: IMedicalRest = new MedicalRest({
+      patientId,
+      nombre_paciente,
+      cedula_paciente,
+      sintomas,
+      fecha,
+      diagnostico,
+      fecha_inicio,
+      fecha_final,
+      comentarios,
+    });
+
+    const savedMedicalRest: IMedicalRest = await newMedicalRest.save();
+
+    return res.status(201).json(savedMedicalRest);
   } catch (err) {
-  if ((err as any).name === 'ValidationError') {
-  const validationErrors = Object.values((err as any).errors).map((e: any) => e.message);
-  return res.status(400).json({ msg: 'Validation error', errors: validationErrors });
-  } else if ((err as any).code === 11000) {
-  // Duplicate key error
-  return res.status(400).json({ msg: 'Duplicate key error' });
-  } else {
-  console.error(err);
-  return res.status(500).json({ msg: 'Internal server error' });
+    if ((err as any).name === 'ValidationError') {
+      const validationErrors = Object.values((err as any).errors).map((e: any) => e.message);
+      return res.status(400).json({ msg: 'Validation error', errors: validationErrors });
+    } else if ((err as any).code === 11000) {
+      // Duplicate key error
+      return res.status(400).json({ msg: 'Duplicate key error' });
+    } else {
+      console.error(err);
+      return res.status(500).json({ msg: 'Internal server error' });
+    }
   }
-  }
-  };
+};
+
+
+
 
 
 
@@ -89,7 +95,7 @@ export const getMedicalReportsByPatientId = async (req: Request, res: Response) 
 // actualizar un reporte médico
 export const updateMedicalRest = async (req: Request, res: Response) => {
   try {
-    const { id, patientId, nombre_paciente, cedula_paciente, sintomas, fecha, diagnostico, fecha_inicio, fecha_final } = req.body;
+    const { id, patientId, nombre_paciente, cedula_paciente, sintomas, fecha, diagnostico, fecha_inicio, fecha_final, comentarios } = req.body;
 
     // Validar que se haya enviado un ID válido
     if (!id) {
@@ -111,6 +117,7 @@ export const updateMedicalRest = async (req: Request, res: Response) => {
     medicalRest.diagnostico = diagnostico;
     medicalRest.fecha_inicio = fecha_inicio;
     medicalRest.fecha_final = fecha_final;
+    medicalRest.comentarios = comentarios;
 
     // Guardar los cambios en la base de datos
     await medicalRest.save();
@@ -138,43 +145,38 @@ export const deleteMedicalRest = async (req: Request, res: Response): Promise<Re
   }
 };
 
-/*
+
 //crar pdf de medical rest
 
-export const createMedicalRestPDF = async (medicalRest: IMedicalRest) => {
-  try {
-    const { patientId, nombre_paciente, cedula_paciente, sintomas, fecha, diagnostico, fecha_inicio, fecha_final } = medicalRest;
 
-    // Crear un nuevo documento PDF
-    const doc = await pdf.PDFDocument.create();
 
-    // Agregar una página al documento
-    const page = await doc.addPage();
+export const createMedicalRestPDFRoute = async (req: Request, res: Response): Promise<void> => {
+  const { patientId, nombre_paciente, cedula_paciente, sintomas, fecha, diagnostico, fecha_inicio, fecha_final, comentarios = '' } = req.body;
 
-    // Escribir el contenido del reporte médico en el PDF
-    const font = await doc.embedFont(pdf.StandardFonts.Helvetica);
-    const { width, height } = page.getSize();
-
-    let y = height - 50;
-    page.drawText(`Nombre del paciente: ${nombre_paciente}`, { x: 50, y, font, size: 12 });
-    y -= 20;
-    page.drawText(`Cédula del paciente: ${cedula_paciente}`, { x: 50, y, font, size: 12 });
-    y -= 20;
-    page.drawText(`Fecha: ${fecha}`, { x: 50, y, font, size: 12 });
-    y -= 20;
-    page.drawText(`Síntomas: ${sintomas}`, { x: 50, y, font, size: 12 });
-    y -= 20;
-    page.drawText(`Diagnóstico: ${diagnostico}`, { x: 50, y, font, size: 12 });
-    y -= 20;
-    page.drawText(`Fecha de inicio: ${fecha_inicio}`, { x: 50, y, font, size: 12 });
-    y -= 20;
-    page.drawText(`Fecha final: ${fecha_final}`, { x: 50, y, font, size: 12 });
-
-    // Guardar el documento PDF
-    const pdfBytes = await doc.save();
-    return pdfBytes;
-  } catch (error) {
-    console.error('Error al crear el PDF:', error);
-    throw error;
+  if (!patientId || !nombre_paciente || !cedula_paciente || !sintomas || !fecha || !diagnostico || !fecha_inicio || !fecha_final) {
+    res.status(400).json({ msg: 'Please provide all required fields' });
+    return;
   }
-};*/
+
+  try {
+    const pdfData: IMedicalRestPDFData = {
+      patientId: String(patientId),
+      nombre_paciente,
+      cedula_paciente,
+      sintomas,
+      fecha: fecha.toString(), // Convertir fecha a string
+      diagnostico,
+      fecha_inicio: fecha_inicio.toString(), // Convertir fecha_inicio a string
+      fecha_final: fecha_final.toString(), // Convertir fecha_final a string
+      comentarios: comentarios || '',
+    };
+
+    const pdfBuffer = createMedicalRestPDF(pdfData);
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.send(pdfBuffer);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Error generating PDF' });
+  }
+};

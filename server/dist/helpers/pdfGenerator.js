@@ -1,25 +1,65 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createMedicalRestPDF = void 0;
 const jspdf_1 = require("jspdf");
+const fs_1 = __importDefault(require("fs"));
 const createMedicalRestPDF = (data) => {
     const doc = new jspdf_1.jsPDF();
-    doc.setFontSize(16);
-    doc.setFont("Courier", "bold");
-    doc.text("SENIAT", 90, 10);
-    doc.setFont("Courier", "normal");
-    doc.text("BillMaster. C.A.", 78, 20);
-    doc.text("billmaster calle 123", 68, 30);
-    doc.text("Tierra Negra, Mcbo, Edo. Zulia", 53, 40);
+    const imagePath1 = 'C:\\Users\\tatox\\Documents\\GitHub\\Tesis-app\\server\\src\\helpers\\esculapio.png';
+    if (fs_1.default.existsSync(imagePath1)) {
+        const imgData = fs_1.default.readFileSync(imagePath1, 'base64');
+        const imgProps = doc.getImageProperties(imgData);
+        const imageWidth = 50;
+        const imageHeight = (imgProps.height * imageWidth) / imgProps.width; // Mantiene la proporción de la imagen
+        doc.addImage(imgData, 'PNG', 10, 10, 40, 40);
+    }
+    else {
+        console.error('Imagen no encontrada en:', imagePath1);
+    }
+    //Informacion medico
+    doc.setFontSize(30);
+    doc.text("Dra. Gricel Perez", 70, 15);
+    doc.setFontSize(18);
+    doc.text("Medica Cirujana/Mgsc. en Salud Ocupacional", 70, 25);
+    doc.setFontSize(18);
+    doc.text("COMEZU: 12287 / MPPS: 66370", 70, 35);
+    doc.text("Medicina del Trabajo e Higiene Industrial", 70, 45);
+    // Continuar con el resto de la información del paciente
     doc.setFontSize(13);
-    doc.text("Fecha: " + data.fecha.toISOString().split('T')[0], 10, 50);
-    doc.text("------------------ INFORMACION DEL PACIENTE ------------------", 10, 65);
-    doc.text("NOMBRE DEL PACIENTE: " + data.nombre_paciente, 10, 75);
-    doc.text("CEDULA: " + data.cedula_paciente, 10, 85);
-    doc.text("SINTOMAS PRESENTADOS: " + data.sintomas, 10, 95);
-    doc.text("Fecha Inicio de Reposo: " + data.fecha_inicio.toISOString().split('T')[0], 10, 105);
-    doc.text("Fecha Finalización de Reposo: " + data.fecha_final.toISOString().split('T')[0], 10, 115);
-    doc.text("Diagnóstico: " + data.diagnostico, 10, 125);
+    doc.text("Fecha: " + data.fecha, 10, 70); // Usando la fecha directamente como cadena
+    doc.text("--------------------------- REPOSO MEDICO ---------------------------", 40, 85);
+    const parrafo = `
+    El Paciente ${data.nombre_paciente}, titular de la cedula: ${data.cedula_paciente}, manifiesta que presenta los siguientes síntomas: ${data.sintomas}.
+    
+    En la evaluación de ingreso del ${data.fecha} se encontró y concluyó que el paciente posee ${data.diagnostico}, se indicó tratamiento médico.
+    
+    Se indica reposo desde el ${data.fecha_inicio} hasta el ${data.fecha_final} debiendo ingresar el día ${data.fecha_final}.`;
+    doc.setFontSize(14);
+    const splitParrafo = doc.splitTextToSize(parrafo, 180); // Ajustar el tamaño del párrafo al ancho del documento
+    doc.text(splitParrafo, 20, 100); // Ajustar la posición del párrafo según necesidad
+    if (data.comentarios !== undefined && data.comentarios !== null && data.comentarios.trim() !== '') {
+        doc.text(`Comentarios: ${data.comentarios}`, 20, 165);
+    }
+    // Agregar imagen de la firma del doctor
+    const imagePath = 'C:\\Users\\tatox\\Documents\\GitHub\\Tesis-app\\server\\src\\helpers\\firma.png';
+    if (fs_1.default.existsSync(imagePath)) {
+        const imgData = fs_1.default.readFileSync(imagePath, 'base64');
+        const imgProps = doc.getImageProperties(imgData);
+        const imageWidth = 50; // Tamaño deseado para la imagen
+        const imageHeight = (imgProps.height * imageWidth) / imgProps.width; // Mantiene la proporción de la imagen
+        doc.addImage(imgData, 'PNG', 90, 220, imageWidth, imageHeight);
+    }
+    else {
+        console.error('Imagen no encontrada en:', imagePath);
+    }
+    // Agregar espacio para la firma del doctor
+    doc.rect(50, 210, 115, 40); // Crea un recuadro para la firma
+    doc.setFontSize(10);
+    doc.text('Firma del médico:', 55, 235);
+    doc.text('Gricel C. Perez V.', 95, 255);
     const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
     return pdfBuffer;
 };

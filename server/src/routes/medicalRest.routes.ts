@@ -1,7 +1,7 @@
 // routes/medicalReportRoutes.js
 
 import express, { Router } from 'express';
-import { createMedicalRest, getAllMedicalRests, getMedicalRestById, updateMedicalRest, deleteMedicalRest, getMedicalReportsByPatientId }
+import { createMedicalRest, getAllMedicalRests, getMedicalRestById, updateMedicalRest, deleteMedicalRest, getMedicalReportsByPatientId, createMedicalRestPDFRoute }
 from '../controllers/medicalRest.controller';
 
 const router: Router = express.Router();
@@ -23,5 +23,8 @@ router.put('/update-medical-rest', updateMedicalRest); //
 
 // Ruta para eliminar un reporte médico
 router.delete('/delete-medical-rest/:id', deleteMedicalRest); //
+
+// Ruta para generar un PDF basado en datos de medical rest
+router.post('/create-medical-rest-pdf', createMedicalRestPDFRoute); //
 
 export default router;

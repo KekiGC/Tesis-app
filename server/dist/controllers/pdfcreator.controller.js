@@ -16,8 +16,8 @@ exports.createMedicalRest = void 0;
 const medicalRest_1 = __importDefault(require("../models/medicalRest"));
 const pdfGenerator_1 = require("../helpers/pdfGenerator");
 const createMedicalRest = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { patientId, nombre_paciente, cedula_paciente, sintomas, fecha, diagnostico, fecha_inicio, fecha_final } = req.body;
-    if (!patientId || !nombre_paciente || !cedula_paciente || !sintomas || !fecha || !diagnostico || !fecha_inicio || !fecha_final) {
+    const { patientId, nombre_paciente, cedula_paciente, sintomas, fecha, diagnostico, fecha_inicio, fecha_final, comentarios } = req.body;
+    if (!patientId || !nombre_paciente || !cedula_paciente || !sintomas || !fecha || !diagnostico || !fecha_inicio || !fecha_final || !comentarios) {
         return res.status(400).json({ msg: 'Please provide all fields' });
     }
     try {
@@ -26,25 +26,31 @@ const createMedicalRest = (req, res) => __awaiter(void 0, void 0, void 0, functi
             nombre_paciente,
             cedula_paciente,
             sintomas,
-            fecha,
+            fecha, // Dejar fecha como cadena
             diagnostico,
-            fecha_inicio,
-            fecha_final,
+            fecha_inicio, // Dejar fecha_inicio como cadena
+            fecha_final, // Dejar fecha_final como cadena
+            comentarios,
         });
         const savedMedicalRest = yield newMedicalRest.save();
+        // Convertir las fechas a cadenas
         const pdfData = {
             patientId: String(savedMedicalRest.patientId),
             nombre_paciente: savedMedicalRest.nombre_paciente,
             cedula_paciente: savedMedicalRest.cedula_paciente,
             sintomas: savedMedicalRest.sintomas,
-            fecha: savedMedicalRest.fecha,
+            fecha: savedMedicalRest.fecha, // Mantener como cadena
             diagnostico: savedMedicalRest.diagnostico,
-            fecha_inicio: savedMedicalRest.fecha_inicio,
-            fecha_final: savedMedicalRest.fecha_final,
+            fecha_inicio: savedMedicalRest.fecha_inicio, // Mantener como cadena
+            fecha_final: savedMedicalRest.fecha_final, // Mantener como cadena
+            comentarios: savedMedicalRest.comentarios,
         };
+        // Generar el PDF
         const pdfBuffer = (0, pdfGenerator_1.createMedicalRestPDF)(pdfData);
+        // Enviar el PDF como respuesta
         res.setHeader('Content-Type', 'application/pdf');
         res.send(pdfBuffer);
+        // Retornar la respuesta JSON con los datos guardados
         return res.status(201).json(savedMedicalRest);
     }
     catch (err) {

@@ -23,7 +23,7 @@ const medicalRestSchema = new mongoose_1.Schema({
         trim: true,
     },
     fecha: {
-        type: Date,
+        type: String,
         required: true,
     },
     diagnostico: {
@@ -32,12 +32,16 @@ const medicalRestSchema = new mongoose_1.Schema({
         trim: true,
     },
     fecha_inicio: {
-        type: Date,
+        type: String,
         required: true,
     },
     fecha_final: {
-        type: Date,
+        type: String,
         required: true,
+    },
+    comentarios: {
+        type: String,
+        required: false,
     },
 });
 exports.default = (0, mongoose_1.model)('MedicalRest', medicalRestSchema);
