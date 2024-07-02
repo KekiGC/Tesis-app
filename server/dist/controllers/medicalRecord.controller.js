@@ -12,10 +12,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteMedicalRecord = exports.updateMedicalRecord = exports.createMedicalRecord = exports.getMedicalRecord = exports.getMedicalRecords = void 0;
+exports.deleteMedicalRecord = exports.updateMedicalRecord = exports.createMedicalRecord = exports.getMedicalRecord = void 0;
 const medicalRecord_1 = __importDefault(require("../models/medicalRecord"));
 // obtener las historias clinicas de un paciente por su id
-const getMedicalRecords = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getMedicalRecord = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     if (!id) {
         return res.status(400).json({ msg: 'Please provide an id' });
@@ -29,29 +29,27 @@ const getMedicalRecords = (req, res) => __awaiter(void 0, void 0, void 0, functi
         return res.status(500).json({ msg: 'Internal server error' });
     }
 });
-exports.getMedicalRecords = getMedicalRecords;
-// obtener una historia clinica por su id
-const getMedicalRecord = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id } = req.params;
-    if (!id) {
-        return res.status(400).json({ msg: 'Please provide an id' });
-    }
-    try {
-        const medicalRecord = yield medicalRecord_1.default.findById(id);
-        if (!medicalRecord) {
-            return res.status(404).json({ msg: 'Medical record not found' });
-        }
-        return res.status(200).json(medicalRecord);
-    }
-    catch (error) {
-        console.error(error);
-        return res.status(500).json({ msg: 'Internal server error' });
-    }
-});
 exports.getMedicalRecord = getMedicalRecord;
+// obtener una historia clinica por su id
+// export const getMedicalRecord = async (req: Request, res: Response): Promise<Response> => {
+//   const { id } = req.params;
+//   if (!id) {
+//     return res.status(400).json({ msg: 'Please provide an id' });
+//   }
+//   try {
+//     const medicalRecord = await MedicalRecord.findById(id);
+//     if (!medicalRecord) {
+//       return res.status(404).json({ msg: 'Medical record not found' });
+//     }
+//     return res.status(200).json(medicalRecord);
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({ msg: 'Internal server error' });
+//   }
+// };
 // crear una historia clinica de un paciente
 const createMedicalRecord = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { patientId, observaciones, ant_personales, ant_familiares, alergias, vacunas, medicamentos, enf_cronicas } = req.body;
+    const { patientId, observaciones, ant_medicos, ant_familiares, ant_laborales, alergias, vacunas, medicamentos, enf_cronicas, empresa, grupoSanguineo, habits } = req.body;
     try {
         if (!patientId) {
             return res.status(400).json({ msg: 'Please provide the patient id' });

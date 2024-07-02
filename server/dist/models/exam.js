@@ -1,38 +1,14 @@
-import { model, Schema, Document } from 'mongoose';
-import { IPatient } from './patient';
-
-interface IVitalSigns {
-    FC: number; // Frecuencia Cardíaca
-    TA: string; // Tensión Arterial (formato número/numero)
-    FR: number; // Frecuencia Respiratoria
-}
-
-export interface IExam extends Document {
-    patientId: IPatient['_id'];
-    impresion_general: string;
-    peso: number;
-    talla_cms: number;
-    piel: string;
-    cabeza: string;
-    torax_corazon_pulmones: string;
-    aparato_respiratorio: string;
-    abdomen_pelvis: string;
-    genitales: string;
-    hernia_umbilical: string;
-    hernia_inguinal: string;
-    sist_nervioso: string;
-    osteomioarticular: string;
-}
-
-const VitalSignsSchema = new Schema<IVitalSigns>({
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const mongoose_1 = require("mongoose");
+const VitalSignsSchema = new mongoose_1.Schema({
     FC: { type: Number, required: true },
     TA: { type: String, required: true },
     FR: { type: Number, required: true },
-  });
-
-const examSchema = new Schema({
+});
+const examSchema = new mongoose_1.Schema({
     patientId: {
-        type: Schema.Types.ObjectId,
+        type: mongoose_1.Schema.Types.ObjectId,
         ref: 'Patient',
         required: true,
     },
@@ -105,10 +81,8 @@ const examSchema = new Schema({
         type: VitalSignsSchema,
         required: true,
     },
-},
-{
+}, {
     timestamps: true,
     versionKey: false,
 });
-
-export default model<IExam>('Exam', examSchema);
+exports.default = (0, mongoose_1.model)('Exam', examSchema);

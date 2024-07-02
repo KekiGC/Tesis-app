@@ -1,18 +1,40 @@
 import { model, Schema, Document } from 'mongoose';
 import { IPatient } from './patient';
 
+interface Ihabits {
+  alcohol: string;
+  estupefacientes: string;
+  actividad_fisica: string;
+  tabaco: string;
+  cafe: string;
+  sueño: string;
+  alimentacion: string;
+  sexuales: string;
+}
+
 export interface IMedicalRecord extends Document {
   patientId: IPatient['_id'];
   observaciones: string;
   ant_medicos: string;
   ant_familiares: string;
   ant_laborales: string;
-  habitos: string;
   alergias: string;
   vacunas: string;
   medicamentos: string;
   enf_cronicas: string;
 }
+
+const habitsSchema = new Schema<Ihabits>({
+  alcohol: { type: String, required: true },
+  estupefacientes: { type: String, required: true },
+  actividad_fisica: { type: String, required: true },
+  tabaco: { type: String, required: true },
+  cafe: { type: String, required: true },
+  sueño: { type: String, required: true },
+  alimentacion: { type: String, required: true },
+  sexuales: { type: String, required: true },
+});
+
 
 const medicalRecordSchema = new Schema({
   patientId: {
@@ -40,11 +62,6 @@ const medicalRecordSchema = new Schema({
     required: false,
     trim: true,
   },
-  habitos: {
-    type: String,
-    required: false,
-    trim: true,
-  },
   alergias: {
     type: String,
     required: false,
@@ -65,6 +82,14 @@ const medicalRecordSchema = new Schema({
     required: false,
     trim: true,
   },
+  habits: {
+    type: habitsSchema,
+    required: true,
+  },
+},
+{
+  timestamps: true,
+  versionKey: false,
 });
 
 export default model<IMedicalRecord>('MedicalRecord', medicalRecordSchema);

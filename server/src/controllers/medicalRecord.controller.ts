@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import MedicalRecord, { IMedicalRecord } from '../models/medicalRecord';
 
 // obtener las historias clinicas de un paciente por su id
-export const getMedicalRecords = async (req: Request, res: Response): Promise<Response> => {
+export const getMedicalRecord = async (req: Request, res: Response): Promise<Response> => {
   const { id } = req.params;
 
   if (!id) {
@@ -42,7 +42,7 @@ export const getMedicalRecords = async (req: Request, res: Response): Promise<Re
 
 // crear una historia clinica de un paciente
 export const createMedicalRecord = async (req: Request, res: Response): Promise<Response> => {
-  const { patientId, observaciones, ant_personales, ant_familiares, alergias, vacunas, medicamentos, enf_cronicas, empresa, grupoSanguineo } = req.body;
+  const { patientId, observaciones, ant_medicos, ant_familiares, ant_laborales, alergias, vacunas, medicamentos, enf_cronicas, empresa, grupoSanguineo, habits } = req.body;
 
   try {
     if (!patientId) {

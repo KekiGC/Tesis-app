@@ -49,6 +49,17 @@ const patientSchema = new mongoose_1.Schema({
         required: true,
         trim: true,
     },
+    empresa: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    grupoSanguineo: {
+        type: String,
+        enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
+        required: true,
+        trim: true,
+    },
 }, {
     versionKey: false,
     timestamps: true,
