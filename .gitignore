@@ -3,5 +3,5 @@ node_modules/
 
 # Ignorar archivo .env
 .env
-server/dist/node_modules
-server/dist/
+
+**/dist/
