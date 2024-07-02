@@ -1,4 +1,5 @@
 "use strict";
+
 // routes/medicalReportRoutes.js
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -22,3 +23,4 @@ router.delete('/delete-medical-rest/:id', medicalRest_controller_1.deleteMedical
 // Ruta para generar un PDF basado en datos de medical rest
 router.post('/create-medical-rest-pdf', medicalRest_controller_1.createMedicalRestPDFRoute); //
 exports.default = router;
+

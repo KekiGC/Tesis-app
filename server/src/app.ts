@@ -1,4 +1,5 @@
 import express from "express";
+import dotenv from "dotenv";
 import morgan from "morgan";
 import cors from "cors";
 import passport from "passport";
@@ -12,6 +13,7 @@ import appointmentRoutes from "./routes/appointment.routes";
 import medicalRestRoutes from './routes/medicalRest.routes';
 //inicio
 const app = express();
+dotenv.config();
 
 //configuraciones
 app.set("port", process.env.PORT || 3000);

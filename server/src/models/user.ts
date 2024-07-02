@@ -7,7 +7,6 @@ export interface IUser extends Document {
   password: string;
   name: string;
   lastname: string;
-  specialty: string;
   profileImg: string | null;
   comparePassword: (password: string) => Promise<boolean>;
 }
@@ -41,11 +40,6 @@ const userSchema = new Schema(
       required: true,
       trim: true,
     },
-    specialty: {
-      type: String,
-      required: true,
-      trim: true,
-    },
     profileImg: {
       type: String,
       required: false,
@@ -73,14 +67,5 @@ userSchema.methods.comparePassword = async function (
 ): Promise<boolean> {
   return await bcrypt.compare(password, this.password);
 };
-
-// userSchema.methods.editProfile = async function (
-//   username: string,
-//   bio: string
-// ): Promise<void> {
-//   this.username = username;
-//   this.bio = bio;
-//   await this.save();
-// };
 
 export default model<IUser>("User", userSchema);

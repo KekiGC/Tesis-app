@@ -105,6 +105,10 @@ const examSchema = new Schema({
         type: VitalSignsSchema,
         required: true,
     },
+},
+{
+    timestamps: true,
+    versionKey: false,
 });
 
 export default model<IExam>('Exam', examSchema);

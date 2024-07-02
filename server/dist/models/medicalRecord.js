@@ -1,6 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
+const habitsSchema = new mongoose_1.Schema({
+    alcohol: { type: String, required: true },
+    estupefacientes: { type: String, required: true },
+    actividad_fisica: { type: String, required: true },
+    tabaco: { type: String, required: true },
+    cafe: { type: String, required: true },
+    sueño: { type: String, required: true },
+    alimentacion: { type: String, required: true },
+    sexuales: { type: String, required: true },
+});
 const medicalRecordSchema = new mongoose_1.Schema({
     patientId: {
         type: mongoose_1.Schema.Types.ObjectId,
@@ -27,11 +37,7 @@ const medicalRecordSchema = new mongoose_1.Schema({
         required: false,
         trim: true,
     },
-    habitos: {
-        type: String,
-        required: false,
-        trim: true,
-    },
+
     alergias: {
         type: String,
         required: false,
@@ -52,5 +58,12 @@ const medicalRecordSchema = new mongoose_1.Schema({
         required: false,
         trim: true,
     },
+    habits: {
+        type: habitsSchema,
+        required: true,
+    },
+}, {
+    timestamps: true,
+    versionKey: false,
 });
 exports.default = (0, mongoose_1.model)('MedicalRecord', medicalRecordSchema);

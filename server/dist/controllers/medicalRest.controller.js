@@ -12,6 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+
 exports.createMedicalRestPDFRoute = exports.deleteMedicalRest = exports.updateMedicalRest = exports.getMedicalReportsByPatientId = exports.getMedicalRestById = exports.getAllMedicalRests = exports.createMedicalRest = void 0;
 const mongoose_1 = require("mongoose");
 const medicalRest_1 = __importDefault(require("../models/medicalRest"));
@@ -21,10 +22,12 @@ const createMedicalRest = (req, res) => __awaiter(void 0, void 0, void 0, functi
     const { patientId, nombre_paciente, cedula_paciente, sintomas, fecha, diagnostico, fecha_inicio, fecha_final, comentarios = '' } = req.body;
     if (!patientId || !nombre_paciente || !cedula_paciente || !sintomas || !fecha || !diagnostico || !fecha_inicio || !fecha_final) {
         return res.status(400).json({ msg: 'Please provide all required fields' });
+
     }
     try {
         const newMedicalRest = new medicalRest_1.default({
             patientId,
+
             nombre_paciente,
             cedula_paciente,
             sintomas,
@@ -33,10 +36,12 @@ const createMedicalRest = (req, res) => __awaiter(void 0, void 0, void 0, functi
             fecha_inicio,
             fecha_final,
             comentarios,
+
         });
         const savedMedicalRest = yield newMedicalRest.save();
         return res.status(201).json(savedMedicalRest);
     }
+
     catch (err) {
         if (err.name === 'ValidationError') {
             const validationErrors = Object.values(err.errors).map((e) => e.message);
@@ -178,3 +183,4 @@ const createMedicalRestPDFRoute = (req, res) => __awaiter(void 0, void 0, void 0
     }
 });
 exports.createMedicalRestPDFRoute = createMedicalRestPDFRoute;
+

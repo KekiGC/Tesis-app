@@ -7,12 +7,16 @@ const medicalRestSchema = new mongoose_1.Schema({
         ref: 'Patient',
         required: true,
     },
+
     nombre_paciente: {
+
         type: String,
         required: true,
         trim: true,
     },
+
     cedula_paciente: {
+
         type: String,
         required: true,
         trim: true,
@@ -22,8 +26,10 @@ const medicalRestSchema = new mongoose_1.Schema({
         required: true,
         trim: true,
     },
+
     fecha: {
         type: String,
+
         required: true,
     },
     diagnostico: {
@@ -32,6 +38,7 @@ const medicalRestSchema = new mongoose_1.Schema({
         trim: true,
     },
     fecha_inicio: {
+
         type: String,
         required: true,
     },
@@ -43,5 +50,6 @@ const medicalRestSchema = new mongoose_1.Schema({
         type: String,
         required: false,
     },
+
 });
 exports.default = (0, mongoose_1.model)('MedicalRest', medicalRestSchema);

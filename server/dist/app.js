@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const dotenv_1 = __importDefault(require("dotenv"));
 const morgan_1 = __importDefault(require("morgan"));
 const cors_1 = __importDefault(require("cors"));
 const passport_1 = __importDefault(require("passport"));
@@ -17,6 +18,7 @@ const appointment_routes_1 = __importDefault(require("./routes/appointment.route
 const medicalRest_routes_1 = __importDefault(require("./routes/medicalRest.routes"));
 //inicio
 const app = (0, express_1.default)();
+dotenv_1.default.config();
 //configuraciones
 app.set("port", process.env.PORT || 3000);
 //middlewares

@@ -81,5 +81,10 @@ const examSchema = new mongoose_1.Schema({
         type: VitalSignsSchema,
         required: true,
     },
+
+}, {
+    timestamps: true,
+    versionKey: false,
+
 });
 exports.default = (0, mongoose_1.model)('Exam', examSchema);
