@@ -1,36 +1,60 @@
-import { jsPDF } from "jspdf";
+import { Request, Response } from 'express';
+import MedicalRest, { IMedicalRest } from '../models/medicalRest';
+import { createMedicalRestPDF, IMedicalRestPDFData } from '../helpers/pdfGenerator';
 
-interface DatosMedicos {
-    nombrePaciente: string;
-    cedulaPaciente: string;
-    sintomas: string;
-    fecha: Date;
-    fechaInicio: Date;
-    fechaFinal: Date;
-}
+export const createMedicalRest = async (req: Request, res: Response): Promise<Response> => {
+    const { patientId, nombre_paciente, cedula_paciente, sintomas, fecha, diagnostico, fecha_inicio, fecha_final, comentarios } = req.body;
 
-const generarPDF = ({ nombrePaciente, cedulaPaciente, sintomas, fecha, fechaInicio, fechaFinal }: DatosMedicos): Buffer => {
-    const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.setFont("Courier", "bold");
-    doc.text("SENIAT", 90, 10);
-    doc.setFont("Courier", "normal");
-    doc.text("BillMaster. C.A.", 78, 20);
-    doc.text("billmaster calle 123", 68, 30);
-    doc.text("Tierra Negra, Mcbo, Edo. Zulia", 53, 40);
+    if (!patientId || !nombre_paciente || !cedula_paciente || !sintomas || !fecha || !diagnostico || !fecha_inicio || !fecha_final || !comentarios) {
+        return res.status(400).json({ msg: 'Please provide all fields' });
+    }
 
-    doc.setFontSize(13);
-    doc.text("Fecha: " + fecha, 10, 50);
-    doc.text("------------------ INFORMACION DEL PACIENTE ------------------", 10, 65);
-    doc.text("NOMBRE DEL PACIENTE: " + nombrePaciente, 10, 75);
-    doc.text("CEDULA: " + cedulaPaciente, 10, 85);
-    doc.text("SINTOMAS PRESENTADOS: " + sintomas, 10, 95);
-    doc.text("Fecha Inicio de Reposo: " + fechaInicio, 10, 50);
-    doc.text("Fecha: Finalizacion de Reposo" + fechaFinal, 10, 50);
+    try {
+        const newMedicalRest: IMedicalRest = new MedicalRest({
+            patientId,
+            nombre_paciente,
+            cedula_paciente,
+            sintomas,
+            fecha, // Dejar fecha como cadena
+            diagnostico,
+            fecha_inicio, // Dejar fecha_inicio como cadena
+            fecha_final, // Dejar fecha_final como cadena
+            comentarios,
+        });
 
-    // Convert the PDF to a Buffer
-    const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
-    return pdfBuffer;
+        const savedMedicalRest: IMedicalRest = await newMedicalRest.save();
+
+        // Convertir las fechas a cadenas
+        const pdfData: IMedicalRestPDFData = {
+            patientId: String(savedMedicalRest.patientId),
+            nombre_paciente: savedMedicalRest.nombre_paciente,
+            cedula_paciente: savedMedicalRest.cedula_paciente,
+            sintomas: savedMedicalRest.sintomas,
+            fecha: savedMedicalRest.fecha, // Mantener como cadena
+            diagnostico: savedMedicalRest.diagnostico,
+            fecha_inicio: savedMedicalRest.fecha_inicio, // Mantener como cadena
+            fecha_final: savedMedicalRest.fecha_final, // Mantener como cadena
+            comentarios : savedMedicalRest.comentarios,
+        };
+
+        // Generar el PDF
+        const pdfBuffer = createMedicalRestPDF(pdfData);
+
+        // Enviar el PDF como respuesta
+        res.setHeader('Content-Type', 'application/pdf');
+        res.send(pdfBuffer);
+
+        // Retornar la respuesta JSON con los datos guardados
+        return res.status(201).json(savedMedicalRest);
+    } catch (err) {
+        if ((err as any).name === 'ValidationError') {
+            const validationErrors = Object.values((err as any).errors).map((e: any) => e.message);
+            return res.status(400).json({ msg: 'Validation error', errors: validationErrors });
+        } else if ((err as any).code === 11000) {
+            return res.status(400).json({ msg: 'Duplicate key error' });
+        } else {
+            console.error(err);
+            return res.status(500).json({ msg: 'Internal server error' });
+        }
+    }
 };
-
-export { generarPDF, DatosMedicos };

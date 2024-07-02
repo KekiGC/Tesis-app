@@ -37,6 +37,7 @@ const medicalRecordSchema = new mongoose_1.Schema({
         required: false,
         trim: true,
     },
+
     alergias: {
         type: String,
         required: false,

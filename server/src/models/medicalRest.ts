@@ -3,13 +3,14 @@ import { IPatient } from './patient';
 
 export interface IMedicalRest extends Document {
     patientId: IPatient['_id'];
-    name: string;
-    cedula: string;
+    nombre_paciente: string;
+    cedula_paciente: string;
     sintomas: string;
-    fecha_reporte: Date;
+    fecha: string;
     diagnostico: string;
-    fecha_inicio: Date;
-    fecha_fin: Date;
+    fecha_inicio: string;
+    fecha_final: string;
+    comentarios: string | null;
 }
 
 const medicalRestSchema = new Schema({
@@ -18,12 +19,12 @@ const medicalRestSchema = new Schema({
         ref: 'Patient',
         required: true,
     },
-    name: {
+    nombre_paciente: {
         type: String,
         required: true,
         trim: true,
     },
-    cedula: {
+    cedula_paciente: {
         type: String,
         required: true,
         trim: true,
@@ -33,8 +34,8 @@ const medicalRestSchema = new Schema({
         required: true,
         trim: true,
     },
-    fecha_reporte: {
-        type: Date,
+    fecha: {
+        type: String,
         required: true,
     },
     diagnostico: {
@@ -43,12 +44,16 @@ const medicalRestSchema = new Schema({
         trim: true,
     },
     fecha_inicio: {
-        type: Date,
+        type: String,
         required: true,
     },
-    fecha_fin: {
-        type: Date,
+    fecha_final: {
+        type: String,
         required: true,
+    },
+    comentarios: {
+        type: String,
+        required: false,
     },
 });
 

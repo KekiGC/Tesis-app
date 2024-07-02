@@ -12,7 +12,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+
 exports.deleteMedicalRecord = exports.updateMedicalRecord = exports.createMedicalRecord = exports.getMedicalRecord = void 0;
+
 const medicalRecord_1 = __importDefault(require("../models/medicalRecord"));
 // obtener las historias clinicas de un paciente por su id
 const getMedicalRecord = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -29,7 +31,9 @@ const getMedicalRecord = (req, res) => __awaiter(void 0, void 0, void 0, functio
         return res.status(500).json({ msg: 'Internal server error' });
     }
 });
+
 exports.getMedicalRecord = getMedicalRecord;
+
 // obtener una historia clinica por su id
 // export const getMedicalRecord = async (req: Request, res: Response): Promise<Response> => {
 //   const { id } = req.params;
@@ -49,7 +53,9 @@ exports.getMedicalRecord = getMedicalRecord;
 // };
 // crear una historia clinica de un paciente
 const createMedicalRecord = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+
     const { patientId, observaciones, ant_medicos, ant_familiares, ant_laborales, alergias, vacunas, medicamentos, enf_cronicas, empresa, grupoSanguineo, habits } = req.body;
+
     try {
         if (!patientId) {
             return res.status(400).json({ msg: 'Please provide the patient id' });

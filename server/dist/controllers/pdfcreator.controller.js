@@ -1,26 +1,72 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.generarPDF = void 0;
-const jspdf_1 = require("jspdf");
-const generarPDF = ({ nombrePaciente, cedulaPaciente, sintomas, fecha, fechaInicio, fechaFinal }) => {
-    const doc = new jspdf_1.jsPDF();
-    doc.setFontSize(16);
-    doc.setFont("Courier", "bold");
-    doc.text("SENIAT", 90, 10);
-    doc.setFont("Courier", "normal");
-    doc.text("BillMaster. C.A.", 78, 20);
-    doc.text("billmaster calle 123", 68, 30);
-    doc.text("Tierra Negra, Mcbo, Edo. Zulia", 53, 40);
-    doc.setFontSize(13);
-    doc.text("Fecha: " + fecha, 10, 50);
-    doc.text("------------------ INFORMACION DEL PACIENTE ------------------", 10, 65);
-    doc.text("NOMBRE DEL PACIENTE: " + nombrePaciente, 10, 75);
-    doc.text("CEDULA: " + cedulaPaciente, 10, 85);
-    doc.text("SINTOMAS PRESENTADOS: " + sintomas, 10, 95);
-    doc.text("Fecha Inicio de Reposo: " + fechaInicio, 10, 50);
-    doc.text("Fecha: Finalizacion de Reposo" + fechaFinal, 10, 50);
-    // Convert the PDF to a Buffer
-    const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
-    return pdfBuffer;
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
 };
-exports.generarPDF = generarPDF;
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.createMedicalRest = void 0;
+const medicalRest_1 = __importDefault(require("../models/medicalRest"));
+const pdfGenerator_1 = require("../helpers/pdfGenerator");
+const createMedicalRest = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { patientId, nombre_paciente, cedula_paciente, sintomas, fecha, diagnostico, fecha_inicio, fecha_final, comentarios } = req.body;
+    if (!patientId || !nombre_paciente || !cedula_paciente || !sintomas || !fecha || !diagnostico || !fecha_inicio || !fecha_final || !comentarios) {
+        return res.status(400).json({ msg: 'Please provide all fields' });
+    }
+    try {
+        const newMedicalRest = new medicalRest_1.default({
+            patientId,
+            nombre_paciente,
+            cedula_paciente,
+            sintomas,
+            fecha, // Dejar fecha como cadena
+            diagnostico,
+            fecha_inicio, // Dejar fecha_inicio como cadena
+            fecha_final, // Dejar fecha_final como cadena
+            comentarios,
+        });
+        const savedMedicalRest = yield newMedicalRest.save();
+        // Convertir las fechas a cadenas
+        const pdfData = {
+            patientId: String(savedMedicalRest.patientId),
+            nombre_paciente: savedMedicalRest.nombre_paciente,
+            cedula_paciente: savedMedicalRest.cedula_paciente,
+            sintomas: savedMedicalRest.sintomas,
+            fecha: savedMedicalRest.fecha, // Mantener como cadena
+            diagnostico: savedMedicalRest.diagnostico,
+            fecha_inicio: savedMedicalRest.fecha_inicio, // Mantener como cadena
+            fecha_final: savedMedicalRest.fecha_final, // Mantener como cadena
+            comentarios: savedMedicalRest.comentarios,
+        };
+        // Generar el PDF
+        const pdfBuffer = (0, pdfGenerator_1.createMedicalRestPDF)(pdfData);
+        // Enviar el PDF como respuesta
+        res.setHeader('Content-Type', 'application/pdf');
+        res.send(pdfBuffer);
+        // Retornar la respuesta JSON con los datos guardados
+        return res.status(201).json(savedMedicalRest);
+    }
+    catch (err) {
+        if (err.name === 'ValidationError') {
+            const validationErrors = Object.values(err.errors).map((e) => e.message);
+            return res.status(400).json({ msg: 'Validation error', errors: validationErrors });
+        }
+        else if (err.code === 11000) {
+            return res.status(400).json({ msg: 'Duplicate key error' });
+        }
+        else {
+            console.error(err);
+            return res.status(500).json({ msg: 'Internal server error' });
+        }
+    }
+});
+exports.createMedicalRest = createMedicalRest;
+

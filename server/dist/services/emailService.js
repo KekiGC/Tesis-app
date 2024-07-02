@@ -16,16 +16,19 @@ exports.sendEmail = void 0;
 const nodemailer_1 = __importDefault(require("nodemailer"));
 const transporter = nodemailer_1.default.createTransport({
     service: 'gmail',
+
     host: 'smtp.gmail.com',
     port: 587,
     secure: false,
     auth: {
         user: process.env.EMAIL_USER || 'empresamedocupa@gmail.com',
         pass: process.env.EMAIL_PASS || 'tklf utga dvkz jljx',
+
     },
 });
 const sendEmail = (to, subject, text) => __awaiter(void 0, void 0, void 0, function* () {
     const mailOptions = {
+
         from: {
             name: 'Empresa Medicina Ocupacional',
             address: process.env.EMAIL_USER || 'empresamedocupa@gmail.com'
