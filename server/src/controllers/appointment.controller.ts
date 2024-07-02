@@ -1,5 +1,8 @@
 import { Request, Response } from 'express';
 import Appointment, { IAppointment } from '../models/appointment';
+import Patient, { IPatient } from '../models/patient';
+import User, { IUser } from '../models/user';
+import { sendEmail } from '../services/emailService';
 
 // obtener las citas de un paciente por su id
 export const getAppointments = async (req: Request, res: Response): Promise<Response> => {
@@ -53,6 +56,20 @@ export const createAppointment = async (req: Request, res: Response): Promise<Re
     });
 
     const savedAppointment = await newAppointment.save();
+
+    // fetch patient and doctor information
+    const patient = await Patient.findById(patientId).exec();
+    const doctor = await User.findById(doctorId).exec();
+
+    // send email to patient and doctor
+    if (patient && doctor) {
+      const emailSubject = 'Nueva cita médica';
+      const emailText = `Hola ${patient.name},\n\nSe ha agendado una nueva cita con el doctor ${doctor.name} para el ${date} a las ${time}.\n\nMotivo: ${motive}\n\nSaludos,\nEquipo de salud`;
+
+      await sendEmail(patient.email, emailSubject, emailText);
+      await sendEmail(doctor.email, emailSubject, emailText);
+    }
+
     return res.status(201).json(savedAppointment);
   } catch (error) {
     console.error(error);

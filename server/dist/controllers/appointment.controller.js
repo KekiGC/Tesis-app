@@ -14,6 +14,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteAppointment = exports.updateAppointment = exports.createAppointment = exports.getAppointment = exports.getAppointments = void 0;
 const appointment_1 = __importDefault(require("../models/appointment"));
+const patient_1 = __importDefault(require("../models/patient"));
+const user_1 = __importDefault(require("../models/user"));
+const emailService_1 = require("../services/emailService");
 // obtener las citas de un paciente por su id
 const getAppointments = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { patientId } = req.params;
@@ -61,6 +64,16 @@ const createAppointment = (req, res) => __awaiter(void 0, void 0, void 0, functi
             motive,
         });
         const savedAppointment = yield newAppointment.save();
+        // fetch patient and doctor information
+        const patient = yield patient_1.default.findById(patientId).exec();
+        const doctor = yield user_1.default.findById(doctorId).exec();
+        // send email to patient and doctor
+        if (patient && doctor) {
+            const emailSubject = 'Nueva cita médica';
+            const emailText = `Hola ${patient.name},\n\nSe ha agendado una nueva cita con el doctor ${doctor.name} para el ${date} a las ${time}.\n\nMotivo: ${motive}\n\nSaludos,\nEquipo de salud`;
+            yield (0, emailService_1.sendEmail)(patient.email, emailSubject, emailText);
+            yield (0, emailService_1.sendEmail)(doctor.email, emailSubject, emailText);
+        }
         return res.status(201).json(savedAppointment);
     }
     catch (error) {

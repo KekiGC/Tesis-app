@@ -1,16 +1,22 @@
 import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail', 
+    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
     auth: {
-      user: process.env.EMAIL_USER, // Tu correo electrónico
-      pass: process.env.EMAIL_PASS, // Tu contraseña de aplicación o contraseña del correo
+      user: process.env.EMAIL_USER || 'empresamedocupa@gmail.com', 
+      pass: process.env.EMAIL_PASS || 'tklf utga dvkz jljx', 
     },
   });
   
   export const sendEmail = async (to: string, subject: string, text: string) => {
     const mailOptions = {
-      from: process.env.EMAIL_USER,
+      from: {
+        name: 'Empresa Medicina Ocupacional',
+        address: process.env.EMAIL_USER || 'empresamedocupa@gmail.com'
+      },
       to,
       subject,
       text,
