@@ -42,7 +42,7 @@ export const getMedicalRecord = async (req: Request, res: Response): Promise<Res
 
 // crear una historia clinica de un paciente
 export const createMedicalRecord = async (req: Request, res: Response): Promise<Response> => {
-  const { patientId, observaciones, ant_medicos, ant_familiares, ant_laborales, alergias, vacunas, medicamentos, enf_cronicas, empresa, grupoSanguineo, habits } = req.body;
+  const { patientId, observaciones, ant_medicos, ant_familiares, ant_laborales, alergias, vacunas, medicamentos, enf_cronicas, empresa, grupoSanguineo, habits, treatment } = req.body;
 
   try {
     if (!patientId) {

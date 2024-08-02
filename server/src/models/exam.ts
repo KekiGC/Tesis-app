@@ -22,6 +22,7 @@ export interface IExam extends Document {
     hernia_inguinal: string;
     sist_nervioso: string;
     osteomioarticular: string;
+    vitalSigns: IVitalSigns;    
 }
 
 const VitalSignsSchema = new Schema<IVitalSigns>({

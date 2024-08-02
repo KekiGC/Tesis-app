@@ -1,19 +1,33 @@
 import { model, Schema, Document } from 'mongoose';
 import { IUser } from './user';
 
+interface IPosition {
+    description: string;
+}
 export interface IPatient extends Document {
   email: string;
   name: string;
   lastname: string;
   doctorId: IUser['_id'];
-  profileImg: string | null;
+  age: number;
+  cedula: string;
+  photo: string | null;
   gender: string;
   birthdate: Date;
   phone: string;
   address: string;
-  empresa: string;
+  company: string;
   grupoSanguineo: string;
+  position: IPosition;
 }
+
+const positionSchema = new Schema({
+    description: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+});
 
 const patientSchema = new Schema({
     email: {
@@ -38,7 +52,16 @@ const patientSchema = new Schema({
         ref: 'User',
         required: true,
     },
-    profileImg: {
+    age: {
+        type: Number,
+        required: true,
+    },
+    cedula: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    photo: {
         type: String,
         required: false,
         trim: true,
@@ -63,7 +86,7 @@ const patientSchema = new Schema({
         required: true,
         trim: true,
     },
-    empresa: {
+    company: {
         type: String,
         required: true,
         trim: true,

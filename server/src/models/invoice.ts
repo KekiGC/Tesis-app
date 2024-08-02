@@ -12,8 +12,6 @@ export interface IInvoice extends Document {
   rif: string;
   forma_pago: string;
   contacto: string;
-  nombre_paciente: string;
-  cedula_paciente: string;
   descripcion_servicio: string;
   total: number;
 }
@@ -59,16 +57,6 @@ const invoiceSchema = new Schema({
     trim: true,
   },
   contacto: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  nombre_paciente: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  cedula_paciente: {
     type: String,
     required: true,
     trim: true,

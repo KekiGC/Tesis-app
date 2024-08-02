@@ -2,8 +2,9 @@ import { Request, Response } from 'express';
 import Patient, { IPatient } from '../models/patient';
 
 export const getPatients = async (req: Request, res: Response): Promise<Response> => {
+  const { doctorId } = req.params;
   try {
-    const patients = await Patient.find();
+    const patients = await Patient.find({ doctorId: doctorId });
     return res.status(200).json(patients);
   } catch (error) {
     console.error(error);
@@ -33,7 +34,7 @@ export const getPatient = async (req: Request, res: Response): Promise<Response>
 };
 
 export const createPatient = async (req: Request, res: Response): Promise<Response> => {
-  const { email, name, lastname, doctorId, profileImg, gender, phone, address, birthdate } = req.body;
+  const { email, name, lastname, doctorId, photo, gender, phone, address, birthdate, age, cedula, position } = req.body;
 
   try {
         if (!email || !name || !lastname || !doctorId || !gender || !phone || !address || !birthdate) {

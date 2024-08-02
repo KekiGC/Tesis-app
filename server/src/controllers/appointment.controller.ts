@@ -5,15 +5,32 @@ import User, { IUser } from '../models/user';
 import { sendEmail } from '../services/emailService';
 
 // obtener las citas de un paciente por su id
-export const getAppointments = async (req: Request, res: Response): Promise<Response> => {
-  const { patientId } = req.params;
+// export const getAppointments = async (req: Request, res: Response): Promise<Response> => {
+//   const { patientId } = req.params;
 
-  if (!patientId) {
+//   if (!patientId) {
+//     return res.status(400).json({ msg: 'Please provide an id' });
+//   }
+
+//   try {
+//     const appointments = await Appointment.find({ patientId: patientId }).sort({ createdAt: -1 }).exec();
+//     return res.status(200).json(appointments);
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({ msg: 'Internal server error' });
+//   }
+// };
+
+// obtener todas las citas de un doctor por su id, ordenadas por fecha
+export const getDoctorAppointments = async (req: Request, res: Response): Promise<Response> => {
+  const { doctorId } = req.params;
+
+  if (!doctorId) {
     return res.status(400).json({ msg: 'Please provide an id' });
   }
 
   try {
-    const appointments = await Appointment.find({ patientId: patientId }).sort({ createdAt: -1 }).exec();
+    const appointments = await Appointment.find({ doctorId: doctorId }).sort({ date: 1 }).exec();
     return res.status(200).json(appointments);
   } catch (error) {
     console.error(error);

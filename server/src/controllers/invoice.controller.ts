@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import Invoice, { IInvoice } from '../models/invoice';
-import Counter, { ICounter } from '../models/counter';
+import Invoice from '../models/invoice';
+import Counter from '../models/counter';
 
 // crear factura
 export const createInvoice = async (

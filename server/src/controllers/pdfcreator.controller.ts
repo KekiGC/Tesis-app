@@ -3,17 +3,15 @@ import MedicalRest, { IMedicalRest } from '../models/medicalRest';
 import { createMedicalRestPDF, IMedicalRestPDFData } from '../helpers/pdfGenerator';
 
 export const createMedicalRest = async (req: Request, res: Response): Promise<Response> => {
-    const { patientId, nombre_paciente, cedula_paciente, sintomas, fecha, diagnostico, fecha_inicio, fecha_final, comentarios } = req.body;
+    const { patientId, sintomas, fecha, diagnostico, fecha_inicio, fecha_final, comentarios } = req.body;
 
-    if (!patientId || !nombre_paciente || !cedula_paciente || !sintomas || !fecha || !diagnostico || !fecha_inicio || !fecha_final || !comentarios) {
+    if (!patientId || !sintomas || !fecha || !diagnostico || !fecha_inicio || !fecha_final || !comentarios) {
         return res.status(400).json({ msg: 'Please provide all fields' });
     }
 
     try {
         const newMedicalRest: IMedicalRest = new MedicalRest({
             patientId,
-            nombre_paciente,
-            cedula_paciente,
             sintomas,
             fecha, // Dejar fecha como cadena
             diagnostico,
@@ -27,8 +25,6 @@ export const createMedicalRest = async (req: Request, res: Response): Promise<Re
         // Convertir las fechas a cadenas
         const pdfData: IMedicalRestPDFData = {
             patientId: String(savedMedicalRest.patientId),
-            nombre_paciente: savedMedicalRest.nombre_paciente,
-            cedula_paciente: savedMedicalRest.cedula_paciente,
             sintomas: savedMedicalRest.sintomas,
             fecha: savedMedicalRest.fecha, // Mantener como cadena
             diagnostico: savedMedicalRest.diagnostico,

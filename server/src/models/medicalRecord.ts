@@ -1,5 +1,6 @@
 import { model, Schema, Document } from 'mongoose';
 import { IPatient } from './patient';
+import { ITreatment } from './treatment';
 
 interface Ihabits {
   alcohol: string;
@@ -20,8 +21,10 @@ export interface IMedicalRecord extends Document {
   ant_laborales: string;
   alergias: string;
   vacunas: string;
-  medicamentos: string;
+  medicamentos: string; // cambiar a objeto o otra tabla de medicinas y separar de tratamientos
   enf_cronicas: string;
+  habits: Ihabits;
+  treatment: ITreatment['_id'];
 }
 
 const habitsSchema = new Schema<Ihabits>({
@@ -85,6 +88,11 @@ const medicalRecordSchema = new Schema({
   habits: {
     type: habitsSchema,
     required: true,
+  },
+  treatment: {
+    type: Schema.Types.ObjectId,
+    ref: 'Treatment',
+    required: false,
   },
 },
 {

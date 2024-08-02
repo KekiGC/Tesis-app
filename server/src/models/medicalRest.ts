@@ -3,8 +3,6 @@ import { IPatient } from './patient';
 
 export interface IMedicalRest extends Document {
     patientId: IPatient['_id'];
-    nombre_paciente: string;
-    cedula_paciente: string;
     sintomas: string;
     fecha: string;
     diagnostico: string;

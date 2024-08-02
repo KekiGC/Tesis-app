@@ -5,8 +5,6 @@ import { IUser } from './user';
 export interface IReport extends Document {
     patientId: IPatient['_id'];
     doctorId: IUser['_id'];
-    name: string;
-    cedula: string;
     fecha_reporte: Date;
     sintomas: string;
     hallazgos: string;
@@ -24,16 +22,6 @@ const reportSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'User',
         required: true,
-    },
-    name: {
-        type: String,
-        required: true,
-        trim: true,
-    },
-    cedula: {
-        type: String,
-        required: true,
-        trim: true,
     },
     fecha_reporte: {
         type: Date,

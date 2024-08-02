@@ -9,7 +9,6 @@ import specialRoutes from "./routes/special.routes";
 import patientRoutes from "./routes/patient.routes";
 import medicalRecordRoutes from "./routes/medicalRecord.routes";
 import appointmentRoutes from "./routes/appointment.routes";
-//import pdfroutes from "./routes/pdf.routes";
 import medicalRestRoutes from './routes/medicalRest.routes';
 import invoiceRoutes from "./routes/invoice.routes";
 
@@ -38,7 +37,6 @@ app.use(specialRoutes);
 app.use(patientRoutes);
 app.use(medicalRecordRoutes);
 app.use(appointmentRoutes);
-//app.use(pdfroutes);
 app.use(medicalRestRoutes);
 app.use(invoiceRoutes);
 
