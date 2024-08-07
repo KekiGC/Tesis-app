@@ -1,58 +1,57 @@
-import { model, Schema, Document } from 'mongoose';
-import { IPatient } from './patient';
+import { Document, Schema, model } from 'mongoose';
+import { IPatient } from './patient'; // Asegúrate de importar el modelo de paciente
 
 export interface IMedicalRest extends Document {
-    patientId: IPatient['_id'];
-    sintomas: string;
-    fecha: string;
-    diagnostico: string;
-    fecha_inicio: string;
-    fecha_final: string;
-    comentarios: string | null;
+  patientId: IPatient['_id'];
+  sintomas: string;
+  fecha: Date;
+  diagnostico: string;
+  fecha_inicio: Date;
+  fecha_final: Date;
+  comentarios: string;
+  nombre_paciente?: string;
+  cedula_paciente?: string;
 }
 
-const medicalRestSchema = new Schema({
-    patientId: {
-        type: Schema.Types.ObjectId,
-        ref: 'Patient',
-        required: true,
-    },
-    nombre_paciente: {
-        type: String,
-        required: true,
-        trim: true,
-    },
-    cedula_paciente: {
-        type: String,
-        required: true,
-        trim: true,
-    },
-    sintomas: {
-        type: String,
-        required: true,
-        trim: true,
-    },
-    fecha: {
-        type: String,
-        required: true,
-    },
-    diagnostico: {
-        type: String,
-        required: true,
-        trim: true,
-    },
-    fecha_inicio: {
-        type: String,
-        required: true,
-    },
-    fecha_final: {
-        type: String,
-        required: true,
-    },
-    comentarios: {
-        type: String,
-        required: false,
-    },
+const medicalRestSchema = new Schema<IMedicalRest>({
+  patientId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Patient',
+    required: true,
+  },
+  sintomas: {
+    type: String,
+    required: true,
+  },
+  fecha: {
+    type: Date,
+    required: true,
+  },
+  diagnostico: {
+    type: String,
+    required: true,
+  },
+  fecha_inicio: {
+    type: Date,
+    required: true,
+  },
+  fecha_final: {
+    type: Date,
+    required: true,
+  },
+  comentarios: {
+    type: String,
+    required: true,
+  },
+  nombre_paciente: {
+    type: String,
+  },
+  cedula_paciente: {
+    type: String,
+  },
+}, {
+  versionKey: false,
+  timestamps: true,
 });
 
 export default model<IMedicalRest>('MedicalRest', medicalRestSchema);

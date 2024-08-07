@@ -3,7 +3,7 @@ import { IUser } from './user';
 
 interface IPosition {
     description: string;
-}
+} 
 export interface IPatient extends Document {
   email: string;
   name: string;

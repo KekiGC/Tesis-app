@@ -9,7 +9,7 @@ import specialRoutes from "./routes/special.routes";
 import patientRoutes from "./routes/patient.routes";
 import medicalRecordRoutes from "./routes/medicalRecord.routes";
 import appointmentRoutes from "./routes/appointment.routes";
-import medicalRestRoutes from './routes/medicalRest.routes';
+import medicalRestRoutes from "./routes/medicalRest.routes";
 import invoiceRoutes from "./routes/invoice.routes";
 
 //inicio
