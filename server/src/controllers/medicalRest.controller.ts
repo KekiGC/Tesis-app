@@ -2,6 +2,11 @@ import { Request, Response } from 'express';
 import MedicalRest, { IMedicalRest } from '../models/medicalRest';
 import Patient, { IPatient } from '../models/patient'; // Asegúrate de que la ruta sea correcta
 import { generarPDF, DatosMedicos } from '../services/pdf.service'; // Asegúrate de que la ruta sea correcta
+import archiver from 'archiver';
+import { PassThrough } from 'stream';
+import { jsPDF } from 'jspdf';
+import path from 'path';
+import fs from 'fs';
 
 // Crear un nuevo reporte médico
 export const createMedicalRest = async (req: Request, res: Response): Promise<Response> => {
@@ -13,7 +18,7 @@ export const createMedicalRest = async (req: Request, res: Response): Promise<Re
 
     try {
         // Crear y guardar el nuevo reporte médico
-        const newMedicalRest: IMedicalRest = new MedicalRest({
+        const newMedicalRest = new MedicalRest({
             patientId,
             sintomas,
             fecha,
@@ -23,15 +28,15 @@ export const createMedicalRest = async (req: Request, res: Response): Promise<Re
             comentarios,
         });
 
-        const savedMedicalRest: IMedicalRest = await newMedicalRest.save();
+        const savedMedicalRest = await newMedicalRest.save();
 
         // Buscar el paciente por ID
-        const patient: IPatient | null = await Patient.findById(patientId);
+        const patient = await Patient.findById(patientId);
 
         // Preparar los datos para el PDF
         const pdfData: DatosMedicos = {
-            nombrePaciente: patient ? `${patient.name} ${patient.lastname}` : 'Desconocido', // Usa el nombre completo del paciente
-            cedulaPaciente: patient ? patient.cedula : 'N/A', // Usa la cédula del paciente
+            nombrePaciente: patient ? `${patient.name} ${patient.lastname}` : 'Desconocido',
+            cedulaPaciente: patient ? patient.cedula : 'N/A',
             sintomas: savedMedicalRest.sintomas,
             diagnostico: savedMedicalRest.diagnostico,
             fecha: new Date(savedMedicalRest.fecha),
@@ -44,10 +49,8 @@ export const createMedicalRest = async (req: Request, res: Response): Promise<Re
 
         // Enviar el PDF como respuesta
         res.setHeader('Content-Type', 'application/pdf');
-        res.send(pdfBuffer);
+        return res.send(pdfBuffer);
 
-        // Retornar la respuesta JSON con los datos guardados
-        return res.status(201).json(savedMedicalRest);
     } catch (err) {
         if ((err as any).name === 'ValidationError') {
             const validationErrors = Object.values((err as any).errors).map((e: any) => e.message);
@@ -61,47 +64,71 @@ export const createMedicalRest = async (req: Request, res: Response): Promise<Re
     }
 };
 
-// Obtener todos los reportes médicos
+
+
+
+
 export const getAllMedicalRests = async (req: Request, res: Response): Promise<Response> => {
     try {
+        // Obtener todos los reportes médicos
         const medicalRests = await MedicalRest.find();
+
+        // Si no hay reportes médicos, retornar un error
+        if (medicalRests.length === 0) {
+            return res.status(404).json({ msg: 'No medical reports found' });
+        }
+
+        // Enviar los datos en formato JSON
         return res.status(200).json(medicalRests);
+        
     } catch (err) {
         console.error(err);
         return res.status(500).json({ msg: 'Internal server error' });
     }
 };
 
-// Obtener un reporte médico por ID
+
+
 export const getMedicalRestById = async (req: Request, res: Response): Promise<Response> => {
     const { id } = req.params;
+
     try {
+        // Buscar el reporte médico por ID
         const medicalRest = await MedicalRest.findById(id);
         if (!medicalRest) {
             return res.status(404).json({ msg: 'Medical rest not found' });
         }
-        return res.status(200).json(medicalRest);
+
+        // Buscar el paciente por ID
+        const patient = await Patient.findById(medicalRest.patientId);
+        if (!patient) {
+            return res.status(404).json({ msg: 'Patient not found' });
+        }
+
+        // Preparar los datos para el PDF
+        const pdfData: DatosMedicos = {
+            nombrePaciente: `${patient.name} ${patient.lastname}`,
+            cedulaPaciente: patient.cedula,
+            sintomas: medicalRest.sintomas,
+            diagnostico: medicalRest.diagnostico,
+            fecha: new Date(medicalRest.fecha),
+            fechaInicio: new Date(medicalRest.fecha_inicio),
+            fechaFinal: new Date(medicalRest.fecha_final),
+        };
+
+        // Generar el PDF
+        const pdfBuffer = generarPDF(pdfData);
+
+        // Enviar el PDF como respuesta
+        res.setHeader('Content-Type', 'application/pdf');
+        return res.send(pdfBuffer);
+
     } catch (err) {
         console.error(err);
         return res.status(500).json({ msg: 'Internal server error' });
     }
 };
 
-// Actualizar un reporte médico por ID
-export const updateMedicalRest = async (req: Request, res: Response): Promise<Response> => {
-    const { id } = req.params;
-    const updates = req.body;
-    try {
-        const updatedMedicalRest = await MedicalRest.findByIdAndUpdate(id, updates, { new: true });
-        if (!updatedMedicalRest) {
-            return res.status(404).json({ msg: 'Medical rest not found' });
-        }
-        return res.status(200).json(updatedMedicalRest);
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ msg: 'Internal server error' });
-    }
-};
 
 // Eliminar un reporte médico por ID
 export const deleteMedicalRest = async (req: Request, res: Response): Promise<Response> => {

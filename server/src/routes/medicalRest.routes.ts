@@ -5,7 +5,6 @@ import {
     createMedicalRest, 
     getAllMedicalRests, 
     getMedicalRestById, 
-    updateMedicalRest, 
     deleteMedicalRest, 
 } from '../controllers/medicalRest.controller';
 
@@ -19,11 +18,6 @@ router.get('/getall-medical-rest', getAllMedicalRests);
 
 // Ruta para obtener un reporte médico por su ID
 router.get('/get-medical-rest/:id', getMedicalRestById);
-
-
-
-// Ruta para actualizar un reporte médico existente
-router.put('/update-medical-rest', updateMedicalRest);
 
 // Ruta para eliminar un reporte médico
 router.delete('/delete-medical-rest/:id', deleteMedicalRest);
