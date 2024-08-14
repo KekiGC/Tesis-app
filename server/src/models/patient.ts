@@ -1,5 +1,6 @@
 import { model, Schema, Document } from 'mongoose';
 import { IUser } from './user';
+import { ICompany } from './company';
 
 interface IPosition {
     description: string;
@@ -16,7 +17,7 @@ export interface IPatient extends Document {
   birthdate: Date;
   phone: string;
   address: string;
-  company: string;
+  company: ICompany['_id'];
   grupoSanguineo: string;
   position: IPosition;
 }
@@ -87,15 +88,19 @@ const patientSchema = new Schema({
         trim: true,
     },
     company: {
-        type: String,
+        type: Schema.Types.ObjectId,
+        ref: 'Company',
         required: true,
-        trim: true,
     },
     grupoSanguineo: {
         type: String,
         enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
         required: true,
         trim: true,
+    },
+    position: {
+        type: positionSchema,
+        required: true,
     },
 },
     {

@@ -2,11 +2,7 @@ import { Request, Response } from 'express';
 import MedicalRest, { IMedicalRest } from '../models/medicalRest';
 import Patient, { IPatient } from '../models/patient'; // Asegúrate de que la ruta sea correcta
 import { generarPDF, DatosMedicos } from '../services/pdf.service'; // Asegúrate de que la ruta sea correcta
-import archiver from 'archiver';
-import { PassThrough } from 'stream';
-import { jsPDF } from 'jspdf';
-import path from 'path';
-import fs from 'fs';
+
 
 // Crear un nuevo reporte médico
 export const createMedicalRest = async (req: Request, res: Response): Promise<Response> => {
@@ -63,10 +59,6 @@ export const createMedicalRest = async (req: Request, res: Response): Promise<Re
         }
     }
 };
-
-
-
-
 
 export const getAllMedicalRests = async (req: Request, res: Response): Promise<Response> => {
     try {

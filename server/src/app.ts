@@ -11,6 +11,9 @@ import medicalRecordRoutes from "./routes/medicalRecord.routes";
 import appointmentRoutes from "./routes/appointment.routes";
 import medicalRestRoutes from "./routes/medicalRest.routes";
 import invoiceRoutes from "./routes/invoice.routes";
+import aptitudeRoutes from "./routes/aptitudeProof.routes";
+import companyRoutes from "./routes/company.routes";
+import reportRoutes from "./routes/report.routes";
 
 //inicio
 const app = express();
@@ -39,5 +42,8 @@ app.use(medicalRecordRoutes);
 app.use(appointmentRoutes);
 app.use(medicalRestRoutes);
 app.use(invoiceRoutes);
+app.use(aptitudeRoutes);
+app.use(companyRoutes);
+app.use(reportRoutes);
 
 export default app;
