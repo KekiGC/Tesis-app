@@ -15,7 +15,7 @@ export interface DatosMedicos {
 
 export const generarPDF = ({ nombrePaciente, cedulaPaciente, sintomas, fecha, fechaInicio, fechaFinal, diagnostico }: DatosMedicos): Buffer => {
     const doc = new jsPDF();
-
+ 
     // Ruta de las imágenes
     const esculapioImagePath = path.resolve(__dirname, '../../src/helpers/esculapio.png');
     const firmaImagePath = path.resolve(__dirname, '../../src/helpers/firma.png');

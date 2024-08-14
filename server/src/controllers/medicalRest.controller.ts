@@ -70,16 +70,29 @@ export const getAllMedicalRests = async (req: Request, res: Response): Promise<R
             return res.status(404).json({ msg: 'No medical reports found' });
         }
 
+        // Mapeo para reemplazar el patientId con los datos del paciente
+        const medicalRestsWithPatientData = await Promise.all(
+            medicalRests.map(async (medicalRest) => {
+                const patient = await Patient.findById(medicalRest.patientId);
+
+                return {
+                    ...medicalRest.toObject(),
+                    nombrePaciente: patient ? `${patient.name} ${patient.lastname}` : 'Desconocido',
+                    cedulaPaciente: patient ? patient.cedula : 'N/A',
+                };
+            })
+        );
+
         // Enviar los datos en formato JSON
-        return res.status(200).json(medicalRests);
-        
+        return res.status(200).json(medicalRestsWithPatientData);
+
     } catch (err) {
         console.error(err);
         return res.status(500).json({ msg: 'Internal server error' });
     }
 };
 
-
+ 
 
 export const getMedicalRestById = async (req: Request, res: Response): Promise<Response> => {
     const { id } = req.params;
