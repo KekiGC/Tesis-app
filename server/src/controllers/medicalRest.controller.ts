@@ -6,16 +6,23 @@ import { generarPDF, DatosMedicos } from '../services/pdf.service'; // Asegúrat
 
 // Crear un nuevo reporte médico
 export const createMedicalRest = async (req: Request, res: Response): Promise<Response> => {
-    const { patientId, sintomas, fecha, diagnostico, fecha_inicio, fecha_final, comentarios } = req.body;
+    const { cedulaPaciente, sintomas, fecha, diagnostico, fecha_inicio, fecha_final, comentarios } = req.body;
 
-    if (!patientId || !sintomas || !fecha || !diagnostico || !fecha_inicio || !fecha_final || !comentarios) {
+    if (!cedulaPaciente || !sintomas || !fecha || !diagnostico || !fecha_inicio || !fecha_final || !comentarios) {
         return res.status(400).json({ msg: 'Please provide all fields' });
     }
 
     try {
+        // Buscar el paciente por cédula
+        const patient = await Patient.findOne({ cedula: cedulaPaciente });
+
+        if (!patient) {
+            return res.status(404).json({ msg: 'Patient not found' });
+        }
+
         // Crear y guardar el nuevo reporte médico
         const newMedicalRest = new MedicalRest({
-            patientId,
+            patientId: patient._id,  // Usa el _id del paciente encontrado
             sintomas,
             fecha,
             diagnostico,
@@ -26,13 +33,10 @@ export const createMedicalRest = async (req: Request, res: Response): Promise<Re
 
         const savedMedicalRest = await newMedicalRest.save();
 
-        // Buscar el paciente por ID
-        const patient = await Patient.findById(patientId);
-
         // Preparar los datos para el PDF
         const pdfData: DatosMedicos = {
-            nombrePaciente: patient ? `${patient.name} ${patient.lastname}` : 'Desconocido',
-            cedulaPaciente: patient ? patient.cedula : 'N/A',
+            nombrePaciente: `${patient.name} ${patient.lastname}`,
+            cedulaPaciente: patient.cedula,
             sintomas: savedMedicalRest.sintomas,
             diagnostico: savedMedicalRest.diagnostico,
             fecha: new Date(savedMedicalRest.fecha),
