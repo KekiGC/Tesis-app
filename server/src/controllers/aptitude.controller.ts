@@ -13,8 +13,21 @@ export const getAptitudeProof = async (req: Request, res: Response): Promise<Res
   }
 
   try {
-    const aptitudeProofs = await aptitudeProof.find({ doctorId });
-    return res.status(200).json(aptitudeProofs);
+    // Buscar las constancias de aptitud y poblar la información del paciente
+    const aptitudeProofs = await aptitudeProof.find({ doctorId })
+      .populate({
+        path: 'patientId',
+        select: 'name lastname cedula' 
+      });
+
+    // Modificar la estructura de la respuesta para incluir el nombre completo y cédula del paciente
+    const result = aptitudeProofs.map((proof: any) => ({
+      ...proof.toObject(), // Convertir a objeto JavaScript y mantener la estructura original
+      nombrePaciente: proof.patientId ? `${proof.patientId.name} ${proof.patientId.lastname}` : 'Unknown',
+      cedulaPaciente: proof.patientId ? proof.patientId.cedula : 'N/A',
+    }));
+
+    return res.status(200).json(result);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ msg: 'Internal server error' });
@@ -45,22 +58,29 @@ export const getAptitudeProofById = async (req: Request, res: Response): Promise
 
 // crear una prueba de aptitud
 export const createAptitudeProof = async (req: Request, res: Response): Promise<Response> => {
-  const { patientId, doctorId, concepto, clasificacion } = req.body;
+  const { cedulaPaciente, doctorId, concepto, clasificacion } = req.body;
 
   try {
-    if (!patientId || !doctorId || !concepto || !clasificacion) {
+    if (!cedulaPaciente || !doctorId || !concepto || !clasificacion) {
       return res.status(400).json({ msg: 'Please provide all fields' });
     }
 
-    const newAptitudeProof: IAptitudeProof = new aptitudeProof(req.body);
-    await newAptitudeProof.save();
     
-    const patient = await Patient.findById(patientId).populate('company').exec();
+    const patient = await Patient.findOne({cedula: cedulaPaciente}).populate('company').exec();
     if (!patient) {
-      throw new Error("Paciente no encontrado");
-  }
-
+      return res.status(404).json({ msg: 'Patient not found' });
+    }
+    
     const company = patient.company as ICompany;
+    
+    const newAptitudeProof: IAptitudeProof = new aptitudeProof({
+      patientId: patient._id,
+      doctorId,
+      concepto,
+      clasificacion,
+    });
+
+    const savedAptitudeProof = await newAptitudeProof.save();
 
     //preparar los datos para el pdf
     const pdfData: DatosConstancia = {
@@ -70,8 +90,8 @@ export const createAptitudeProof = async (req: Request, res: Response): Promise<
       fotoPaciente: patient.photo,
       empresa: company.name, 
       cargo: patient.position.description,
-      concepto,
-      clasificacion,
+      concepto: savedAptitudeProof.concepto,
+      clasificacion: savedAptitudeProof.clasificacion,
     };
 
     //generar el pdf

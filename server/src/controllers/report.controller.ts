@@ -57,14 +57,30 @@ export const createReport = async (req: Request, res: Response): Promise<Respons
 
 export const getReports = async (req: Request, res: Response): Promise<Response> => {
     const { doctorId } = req.params;
+
     if (!doctorId) {
         return res.status(400).json({ msg: 'Please provide a doctor id' });
     }
+
     try {
-        const reports = await report.find({ doctorId });
-        return res.status(200).json(reports);
+        // Buscar los informes médicos y poblar la información del paciente
+        const reports = await report.find({ doctorId })
+            .populate({
+                path: 'patientId',
+                select: 'name lastname cedula' // Seleccionar los campos que necesitas
+            });
+
+        // Modificar la estructura de la respuesta para incluir el nombre completo y cédula del paciente
+        const result = reports.map((report: any) => ({
+            ...report.toObject(), // Convertir a objeto JavaScript y mantener la estructura original
+            nombrePaciente: report.patientId ? `${report.patientId.name} ${report.patientId.lastname}` : 'Unknown',
+            cedulaPaciente: report.patientId ? report.patientId.cedula : 'N/A',
+        }));
+
+        return res.status(200).json(result);
     } catch (error) {
-        return res.status(500).json(error);
+        console.error(error);
+        return res.status(500).json({ msg: 'Internal server error' });
     }
 };
 
