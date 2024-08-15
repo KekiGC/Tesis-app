@@ -3,9 +3,9 @@ import { getAptitudeProof, getAptitudeProofById, deleteAptitudeProof, createApti
 
 const router = Router();
 
-router.get('/aptitudeProof/:doctorId', getAptitudeProof);
+router.get('/aptitudeProofs/:doctorId', getAptitudeProof);
 router.get('/aptitudeProof/:id', getAptitudeProofById);
-router.post('/aptitudeProof', createAptitudeProof);
-router.delete('/aptitudeProof/:id', deleteAptitudeProof);
+router.post('/aptitudeProofs', createAptitudeProof);
+router.delete('/aptitudeProofs/:id', deleteAptitudeProof);
 
 export default router;

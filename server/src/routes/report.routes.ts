@@ -3,9 +3,9 @@ import { createReport, getReports, getReport, deleteReport } from '../controller
 
 const router = Router();
 
-router.post('/report', createReport);
-router.get('/report/:doctorId', getReports);
+router.post('/reports', createReport);
+router.get('/reports/:doctorId', getReports);
 router.get('/report/:id', getReport);
-router.delete('/report/:id', deleteReport);
+router.delete('/reports/:id', deleteReport);
 
 export default router;
