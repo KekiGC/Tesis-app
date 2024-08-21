@@ -3,6 +3,7 @@ import { DatosInforme, generarPDFInforme } from '../services/pdfReport.service';
 import report, { IReport } from '../models/report';
 import Patient from '../models/patient';
 import User from '../models/user';
+import userInfo from '../models/userInfo';
 
 export const createReport = async (req: Request, res: Response): Promise<Response> => {
     const { patientId, doctorId, fecha_reporte, sintomas, hallazgos, examenes, diagnostico } = req.body;
@@ -18,6 +19,11 @@ export const createReport = async (req: Request, res: Response): Promise<Respons
         if (!doctor) {
             throw new Error("Doctor no encontrado");
         }
+
+        const doctorInfo = await userInfo.findOne({ user: doctorId });
+        if (!doctorInfo) {
+            throw new Error("Información del doctor no encontrada");
+        }
         
         const patient = await Patient.findById(patientId);
         if (!patient) {
@@ -29,6 +35,11 @@ export const createReport = async (req: Request, res: Response): Promise<Respons
             cedulaPaciente: patient.cedula,
             nombreDoctor: `${doctor.name} ${doctor.lastname}`,
             correoDoctor: doctor.email,
+            direccionDoctor: doctorInfo.direccion,
+            telefonoDoctor: doctorInfo.telefono,
+            inscripcionCMDoctor: doctorInfo.inscripcionCM,
+            registroDoctor: doctorInfo.registro,
+            firmaDoctor: doctorInfo.firma,
             fechaReporte: new Date(savedReport.fecha_reporte).toLocaleDateString(),
             sintomas: savedReport.sintomas,
             hallazgos: savedReport.hallazgos,

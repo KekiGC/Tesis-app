@@ -8,6 +8,8 @@ export interface IUser extends Document {
   name: string;
   lastname: string;
   profileImg: string | null;
+  resetPasswordToken: string | undefined;
+  resetPasswordExpires: Date | undefined;
   comparePassword: (password: string) => Promise<boolean>;
 }
 
@@ -45,6 +47,14 @@ const userSchema = new Schema(
       required: false,
       trim: true,
     },
+    resetPasswordToken: {
+      type: String,
+      required: false,
+    },
+    resetPasswordExpires: {
+      type: Date,
+      required: false,
+    },
   },
   {
     versionKey: false,
@@ -63,7 +73,8 @@ userSchema.pre<IUser>("save", async function (next) {
 });
 
 userSchema.methods.comparePassword = async function (password: string): Promise<boolean> {
-  return await bcrypt.compare(password, this.password);
+  const isMatch = await bcrypt.compare(password, this.password);
+  return isMatch;
 };
 
 export default model<IUser>("User", userSchema);

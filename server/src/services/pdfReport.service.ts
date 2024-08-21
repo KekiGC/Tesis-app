@@ -7,6 +7,11 @@ export interface DatosInforme {
   cedulaPaciente: string;
   nombreDoctor: string;
   correoDoctor: string;
+  direccionDoctor: string;
+  telefonoDoctor: string;
+  inscripcionCMDoctor: string;
+  registroDoctor: string;
+  firmaDoctor: string | null;
   fechaReporte: string;
   sintomas: string;
   hallazgos: string;
@@ -19,6 +24,11 @@ export const generarPDFInforme = ({
   cedulaPaciente,
   nombreDoctor,
   correoDoctor,
+  direccionDoctor,
+  telefonoDoctor,
+  inscripcionCMDoctor,
+  registroDoctor,
+  firmaDoctor,
   fechaReporte,
   sintomas,
   hallazgos,
