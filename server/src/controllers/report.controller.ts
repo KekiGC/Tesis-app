@@ -37,6 +37,7 @@ export const createReport = async (req: Request, res: Response): Promise<Respons
             correoDoctor: doctor.email,
             direccionDoctor: doctorInfo.direccion,
             telefonoDoctor: doctorInfo.telefono,
+            especialidadDoctor: doctorInfo.especialidad,
             inscripcionCMDoctor: doctorInfo.inscripcionCM,
             registroDoctor: doctorInfo.registro,
             firmaDoctor: doctorInfo.firma,
@@ -47,10 +48,10 @@ export const createReport = async (req: Request, res: Response): Promise<Respons
             diagnostico: savedReport.diagnostico,
         };
 
-        const pdfBuffer = generarPDFInforme(pdfData);
+        const pdfBuffer = await generarPDFInforme(pdfData);
 
         res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', 'inline; filename="informe_medico.pdf"');
+        res.setHeader('Content-Disposition', 'attachment; filename="informe_medico.pdf"');
 
         return res.send(pdfBuffer);
     } catch (err) {

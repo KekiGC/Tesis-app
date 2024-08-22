@@ -55,9 +55,35 @@ export const getUserInfo = async (req: Request, res: Response): Promise<Response
 
 // Actualizar la informacion del usuario
 export const updateUserInfo = async (req: Request, res: Response): Promise<Response> => {
+  const { userId } = req.params; // Obtener el ID del usuario desde los parámetros
+
   try {
-    const { userId } = req.params;
-    const updatedUserInfo = await UserInfo.findOneAndUpdate({ user: userId }, req.body, { new: true });
+    let firmaUrl = null;
+
+    // Verificar si el archivo de la firma fue enviado en la solicitud
+    if (req.file) {
+      console.log('Archivo recibido:', req.file.originalname);  // Verificar que el archivo fue recibido
+      // Subir la nueva firma a Firebase
+      firmaUrl = await uploadImage(req.file, 'firmas');  // Cambia 'firmas' por la carpeta en la que deseas guardar las firmas
+      console.log('Firma subida a Firebase:', firmaUrl);  // Verificar que la firma fue subida
+    } else {
+      console.log('No se recibió ningún archivo.');
+    }
+
+    // Buscar la información del usuario por ID y actualizar los campos proporcionados
+    const updatedUserInfo = await UserInfo.findOneAndUpdate(
+      { user: userId },
+      {
+        ...(req.body.especialidad && { especialidad: req.body.especialidad }),
+        ...(req.body.telefono && { telefono: req.body.telefono }),
+        ...(req.body.direccion && { direccion: req.body.direccion }),
+        ...(req.body.cedula && { cedula: req.body.cedula }),
+        ...(req.body.inscripcionCM && { inscripcionCM: req.body.inscripcionCM }),
+        ...(req.body.registro && { registro: req.body.registro }),
+        ...(firmaUrl && { firma: firmaUrl }), // Si se subió una nueva firma, se actualiza
+      },
+      { new: true } // Para devolver el documento actualizado
+    );
 
     if (!updatedUserInfo) {
       return res.status(404).json({ msg: 'User info not found' });

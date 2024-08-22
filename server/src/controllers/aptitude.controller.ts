@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import aptitudeProof, {  IAptitudeProof } from '../models/aptitudeProof';
 import Patient from '../models/patient';
+import User from '../models/user';
+import UserInfo from '../models/userInfo';
 import { generarPDFConstancia, DatosConstancia } from '../services/pdfApt.service';
 import { ICompany } from '../models/company';
 
@@ -70,6 +72,16 @@ export const createAptitudeProof = async (req: Request, res: Response): Promise<
     if (!patient) {
       return res.status(404).json({ msg: 'Patient not found' });
     }
+
+    const doctor = await User.findById(doctorId);
+    if (!doctor) {
+      return res.status(404).json({ msg: 'Doctor not found' });
+    }
+
+    const doctorInfo = await UserInfo.findOne({user: doctorId});
+    if (!doctorInfo) {
+      return res.status(404).json({ msg: 'Doctor info not found' });
+    }
     
     const company = patient.company as ICompany;
     
@@ -92,10 +104,18 @@ export const createAptitudeProof = async (req: Request, res: Response): Promise<
       cargo: patient.position.description,
       concepto: savedAptitudeProof.concepto,
       clasificacion: savedAptitudeProof.clasificacion,
+      nombreDoctor: `${doctor.name} ${doctor.lastname}`,
+      correoDoctor: doctor.email,
+      especialidadDoctor: doctorInfo.especialidad,
+      direccionDoctor: doctorInfo.direccion,
+      telefonoDoctor: doctorInfo.telefono,
+      inscripcionCMDoctor: doctorInfo.inscripcionCM,
+      registroDoctor: doctorInfo.registro,
+      firmaDoctor: doctorInfo.firma,
     };
 
     //generar el pdf
-    const pdfBuffer = generarPDFConstancia(pdfData);
+    const pdfBuffer = await generarPDFConstancia(pdfData);
 
     // Enviar el PDF como respuesta
     res.setHeader('Content-Type', 'application/pdf');

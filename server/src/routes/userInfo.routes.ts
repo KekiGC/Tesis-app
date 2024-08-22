@@ -7,6 +7,6 @@ const router = Router();
 
 router.post('/user/info', upload.single('firma'), createUserInfo);
 router.get('/user/info/:userId', getUserInfo);
-router.put('/user/info/:userId/edit', updateUserInfo);
+router.put('/user/info/:userId/edit', upload.single('firma'), updateUserInfo);
 
 export default router;
