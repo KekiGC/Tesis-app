@@ -3,10 +3,10 @@ const router = Router();
 
 import { getPatients, getPatient, createPatient, updatePatient, deletePatient } from '../controllers/patient.controller';
 
-router.get('/patient/:doctorId', getPatients);
+router.get('/patients/:doctorId', getPatients);
 router.get('/patient/:id', getPatient);
-router.post('/patient', createPatient);
-router.put('/patient/:id', updatePatient);
-router.delete('/patient/:id', deletePatient);
+router.post('/patients', createPatient);
+router.put('/patients/:id', updatePatient);
+router.delete('/patients/:id', deletePatient);
 
 export default router;

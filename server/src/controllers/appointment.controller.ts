@@ -30,7 +30,7 @@ export const getDoctorAppointments = async (req: Request, res: Response): Promis
   }
 
   try {
-    const appointments = await Appointment.find({ doctorId: doctorId }).sort({ date: 1 }).exec();
+    const appointments = await Appointment.find({ doctorId: doctorId }).sort({ date: 1 }).populate('patientId', 'name lastname').exec();
     return res.status(200).json(appointments);
   } catch (error) {
     console.error(error);
