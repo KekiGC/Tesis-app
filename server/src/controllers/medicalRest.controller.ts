@@ -1,14 +1,16 @@
 import { Request, Response } from 'express';
-import MedicalRest, { IMedicalRest } from '../models/medicalRest';
-import Patient, { IPatient } from '../models/patient'; // Asegúrate de que la ruta sea correcta
-import { generarPDF, DatosMedicos } from '../services/pdf.service'; // Asegúrate de que la ruta sea correcta
+import MedicalRest from '../models/medicalRest';
+import Patient from '../models/patient'; 
+import User from '../models/user';
+import UserInfo from '../models/userInfo';
+import { generarPDF, DatosMedicos } from '../services/pdf.service'; 
 
 
 // Crear un nuevo reporte médico
 export const createMedicalRest = async (req: Request, res: Response): Promise<Response> => {
-    const { cedulaPaciente, sintomas, fecha, diagnostico, fecha_inicio, fecha_final, comentarios } = req.body;
+    const { doctorId, cedulaPaciente, sintomas, fecha, diagnostico, fecha_inicio, fecha_final, comentarios } = req.body;
 
-    if (!cedulaPaciente || !sintomas || !fecha || !diagnostico || !fecha_inicio || !fecha_final || !comentarios) {
+    if (!cedulaPaciente || !sintomas || !fecha || !diagnostico || !fecha_inicio || !fecha_final || !comentarios || !doctorId) {
         return res.status(400).json({ msg: 'Please provide all fields' });
     }
 
@@ -20,8 +22,19 @@ export const createMedicalRest = async (req: Request, res: Response): Promise<Re
             return res.status(404).json({ msg: 'Patient not found' });
         }
 
+        const user = await User.findById(doctorId);
+        if (!user) {
+            return res.status(404).json({ msg: 'Doctor not found' });
+        }
+
+        const userInfo = await UserInfo.findOne({ user: doctorId });
+        if (!userInfo) {
+            return res.status(404).json({ msg: 'Doctor info not found' });
+        }
+
         // Crear y guardar el nuevo reporte médico
         const newMedicalRest = new MedicalRest({
+            doctorId,
             patientId: patient._id,  // Usa el _id del paciente encontrado
             sintomas,
             fecha,
@@ -37,15 +50,24 @@ export const createMedicalRest = async (req: Request, res: Response): Promise<Re
         const pdfData: DatosMedicos = {
             nombrePaciente: `${patient.name} ${patient.lastname}`,
             cedulaPaciente: patient.cedula,
+            nombreDoctor: `${user.name} ${user.lastname}`,
+            correoDoctor: user.email,
+            direccionDoctor: userInfo.direccion,
+            telefonoDoctor: userInfo.telefono,
+            especialidadDoctor: userInfo.especialidad,
+            inscripcionCMDoctor: userInfo.inscripcionCM,
+            registroDoctor: userInfo.registro,
+            firmaDoctor: userInfo.firma,
             sintomas: savedMedicalRest.sintomas,
             diagnostico: savedMedicalRest.diagnostico,
             fecha: new Date(savedMedicalRest.fecha),
             fechaInicio: new Date(savedMedicalRest.fecha_inicio),
             fechaFinal: new Date(savedMedicalRest.fecha_final),
+            comentarios: savedMedicalRest.comentarios,
         };
 
         // Generar el PDF
-        const pdfBuffer = generarPDF(pdfData);
+        const pdfBuffer = await generarPDF(pdfData);
 
         // Enviar el PDF como respuesta
         res.setHeader('Content-Type', 'application/pdf');
@@ -65,9 +87,10 @@ export const createMedicalRest = async (req: Request, res: Response): Promise<Re
 };
 
 export const getAllMedicalRests = async (req: Request, res: Response): Promise<Response> => {
+    const { doctorId } = req.params;
     try {
         // Obtener todos los reportes médicos
-        const medicalRests = await MedicalRest.find();
+        const medicalRests = await MedicalRest.find({ doctorId });
 
         // Si no hay reportes médicos, retornar un error
         if (medicalRests.length === 0) {
@@ -98,45 +121,54 @@ export const getAllMedicalRests = async (req: Request, res: Response): Promise<R
 
  
 
-export const getMedicalRestById = async (req: Request, res: Response): Promise<Response> => {
-    const { id } = req.params;
+// export const getMedicalRestById = async (req: Request, res: Response): Promise<Response> => {
+//     const { id } = req.params;
 
-    try {
-        // Buscar el reporte médico por ID
-        const medicalRest = await MedicalRest.findById(id);
-        if (!medicalRest) {
-            return res.status(404).json({ msg: 'Medical rest not found' });
-        }
+//     try {
+//         // Buscar el reporte médico por ID
+//         const medicalRest = await MedicalRest.findById(id);
+//         if (!medicalRest) {
+//             return res.status(404).json({ msg: 'Medical rest not found' });
+//         }
 
-        // Buscar el paciente por ID
-        const patient = await Patient.findById(medicalRest.patientId);
-        if (!patient) {
-            return res.status(404).json({ msg: 'Patient not found' });
-        }
+//         // Buscar el paciente por ID
+//         const patient = await Patient.findById(medicalRest.patientId);
+//         if (!patient) {
+//             return res.status(404).json({ msg: 'Patient not found' });
+//         }
 
-        // Preparar los datos para el PDF
-        const pdfData: DatosMedicos = {
-            nombrePaciente: `${patient.name} ${patient.lastname}`,
-            cedulaPaciente: patient.cedula,
-            sintomas: medicalRest.sintomas,
-            diagnostico: medicalRest.diagnostico,
-            fecha: new Date(medicalRest.fecha),
-            fechaInicio: new Date(medicalRest.fecha_inicio),
-            fechaFinal: new Date(medicalRest.fecha_final),
-        };
+//         // Preparar los datos para el PDF
+//         const pdfData: DatosMedicos = {
+//             nombrePaciente: `${patient.name} ${patient.lastname}`,
+//             cedulaPaciente: patient.cedula,
+//             nombreDoctor: `${user.name} ${user.lastname}`,
+//             correoDoctor: user.email,
+//             direccionDoctor: userInfo.direccion,
+//             telefonoDoctor: userInfo.telefono,
+//             especialidadDoctor: userInfo.especialidad,
+//             inscripcionCMDoctor: userInfo.inscripcionCM,
+//             registroDoctor: userInfo.registro,
+//             firmaDoctor: userInfo.firma,
+//             sintomas: savedMedicalRest.sintomas,
+//             diagnostico: savedMedicalRest.diagnostico,
+//             fecha: new Date(savedMedicalRest.fecha),
+//             fechaInicio: new Date(savedMedicalRest.fecha_inicio),
+//             fechaFinal: new Date(savedMedicalRest.fecha_final),
+//             comentarios: savedMedicalRest.comentarios,
+//         };
 
-        // Generar el PDF
-        const pdfBuffer = generarPDF(pdfData);
+//         // Generar el PDF
+//         const pdfBuffer = generarPDF(pdfData);
 
-        // Enviar el PDF como respuesta
-        res.setHeader('Content-Type', 'application/pdf');
-        return res.send(pdfBuffer);
+//         // Enviar el PDF como respuesta
+//         res.setHeader('Content-Type', 'application/pdf');
+//         return res.send(pdfBuffer);
 
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ msg: 'Internal server error' });
-    }
-};
+//     } catch (err) {
+//         console.error(err);
+//         return res.status(500).json({ msg: 'Internal server error' });
+//     }
+// };
 
 
 // Eliminar un reporte médico por ID

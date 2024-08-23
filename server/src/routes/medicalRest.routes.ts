@@ -1,10 +1,8 @@
-// routes/medicalRest.routes.ts
-
 import express, { Router } from 'express';
 import { 
     createMedicalRest, 
     getAllMedicalRests, 
-    getMedicalRestById, 
+     
     deleteMedicalRest, 
 } from '../controllers/medicalRest.controller';
 
@@ -14,14 +12,13 @@ const router: Router = express.Router();
 router.post('/create-medical-rest', createMedicalRest);
 
 // Ruta para obtener todos los reportes médicos
-router.get('/getall-medical-rest', getAllMedicalRests);
+router.get('/getall-medical-rest/:doctorId', getAllMedicalRests);
 
 // Ruta para obtener un reporte médico por su ID
-router.get('/get-medical-rest/:id', getMedicalRestById);
+// router.get('/get-medical-rest/:id', getMedicalRestById);
 
 // Ruta para eliminar un reporte médico
 router.delete('/delete-medical-rest/:id', deleteMedicalRest);
-
 
 
 export default router;

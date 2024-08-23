@@ -42,7 +42,10 @@ export const generarPDFInforme = async ({
     const doc = new jsPDF();
 
     // Ruta de la imagen de Esculapio
-    const esculapioImagePath = path.resolve(__dirname, '../../src/helpers/esculapio.png');
+    const esculapioImagePath = path.resolve(
+      __dirname,
+      '../../src/helpers/esculapio.png'
+    );
     const esculapioImageBuffer = fs.readFileSync(esculapioImagePath);
 
     // Configurar dimensiones y posiciones
@@ -71,7 +74,7 @@ export const generarPDFInforme = async ({
     doc.text(telefonoDoctor, 80, 35); // Teléfono del doctor
     doc.text(`${inscripcionCMDoctor}`, 80, 40); // Inscripción CM del doctor
     doc.text(`${registroDoctor}`, 80, 45); // Registro del doctor
-    doc.text('Medicina del Trabajo e Higiene Industrial', 80, 50); 
+    doc.text('Medicina del Trabajo e Higiene Industrial', 80, 50);
 
     // Línea separadora
     doc.setLineWidth(0.5);
@@ -79,8 +82,8 @@ export const generarPDFInforme = async ({
 
     // Fecha del reporte en la parte inferior derecha, justo debajo de la línea
     doc.setFontSize(12);
-    doc.setFont('Times', 'normal');
-    doc.text(`Zulia, ${fechaReporte}`, pageWidth - 60, 70); // Posición en la esquina inferior derecha
+    doc.setFont('Times', 'bold');
+    doc.text(`${fechaReporte}`, pageWidth - 60, 70); // Posición en la esquina inferior derecha
 
     // Título "INFORME MÉDICO" centrado
     doc.setFontSize(16);
@@ -117,7 +120,9 @@ export const generarPDFInforme = async ({
     // Verificar si la URL de la firma es válida
     if (firmaDoctor) {
       console.log(`Descargando firma desde: ${firmaDoctor}`);
-      const firmaResponse = await axios.get(firmaDoctor, { responseType: 'arraybuffer' });
+      const firmaResponse = await axios.get(firmaDoctor, {
+        responseType: 'arraybuffer',
+      });
       const firmaImageBuffer = Buffer.from(firmaResponse.data, 'binary');
 
       // Añadir la firma desde Firebase
@@ -147,7 +152,6 @@ export const generarPDFInforme = async ({
     // Texto en el pie de página
     doc.setFontSize(10);
     const footerText = `Dr. ${nombreDoctor}, ${especialidadDoctor}, Email: ${correoDoctor}`;
-    const footerTextWidth = (doc.getStringUnitWidth(footerText) * 10) / 72;
     doc.text(footerText, 10, pageHeight - 10); // El primer parámetro define la posición X (a la izquierda)
 
     // Convertir el PDF a un buffer y devolverlo

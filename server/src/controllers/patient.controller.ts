@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import Patient, { IPatient } from '../models/patient';
+import { uploadImage } from '../services/uploadFile.service';
 
 export const getPatients = async (req: Request, res: Response): Promise<Response> => {
   const { doctorId } = req.params;
@@ -34,34 +35,73 @@ export const getPatient = async (req: Request, res: Response): Promise<Response>
 };
 
 export const createPatient = async (req: Request, res: Response): Promise<Response> => {
-  const { email, name, lastname, doctorId, photo, gender, phone, address, birthdate, age, cedula, position } = req.body;
+  const { email, name, lastname, doctorId, gender, company, phone, address, birthdate, age, cedula, positionDescription, grupoSanguineo } = req.body;
 
   try {
-        if (!email || !name || !lastname || !doctorId || !gender || !phone || !address || !birthdate) {
-            return res.status(400).json({ msg: 'Please provide all fields' });
-        }
+      if (!email || !name || !lastname || !doctorId || !gender || !phone || !address || !birthdate || !age || !cedula || !positionDescription) {
+        console.log(req.body);
+          return res.status(400).json({ msg: 'Please provide all fields' });
+      }
 
-        const patient = await Patient.findOne({ email });
-        console.log(patient);
-        if (patient) {
-            return res.status(400).json({ msg: 'Patient already exists' });
-        }
-    
-      const newPatient: IPatient = new Patient(req.body);
+      const patient = await Patient.findOne({ email });
+      if (patient) {
+          return res.status(400).json({ msg: 'Patient already exists' });
+      }
+
+      // Create a new patient object and set the position description separately
+      const newPatient: IPatient = new Patient({
+          email,
+          name,
+          lastname,
+          doctorId,
+          gender,
+          phone,
+          address,
+          birthdate,
+          age,
+          cedula,
+          company,
+          grupoSanguineo,
+          position: {
+              description: positionDescription
+          }
+      });
+
+      if (req.file) {
+          const file = req.file as Express.Multer.File;
+          newPatient.photo = await uploadImage(file, 'pacientes');
+      }
+
       const savedPatient = await newPatient.save();
       return res.status(201).json(savedPatient);
-    } catch (error) {
+  } catch (error) {
       console.error(error);
       return res.status(500).json({ msg: 'Internal server error' });
-    }
+  }
 };
 
 export const updatePatient = async (req: Request, res: Response): Promise<Response> => {
     try {
-        const updatedPatient = await Patient.findByIdAndUpdate(req.params.id, req.body, { new: true });
+      let photoUrl = null;
+      if (req.file) {
+        console.log('Archivo recibido:', req.file.originalname)
+        const file = req.file as Express.Multer.File;
+        photoUrl = await uploadImage(file, 'pacientes');
+        console.log('firma subida a Firebase:', photoUrl);
+      } else {
+        console.log('No se recibió archivo');
+      }
+
+        const updatedPatient = await Patient.findByIdAndUpdate(req.params.id, {
+            ...req.body,
+            photo: photoUrl,
+        }, 
+        { new: true });
+
         if (!updatedPatient) {
             return res.status(404).json({ error: 'Patient not found' });
         }
+
         return res.status(200).json(updatedPatient);
     } catch (error) {
         return res.status(500).json({ error: 'Error updating the patient information' });

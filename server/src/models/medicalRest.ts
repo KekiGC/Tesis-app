@@ -1,7 +1,9 @@
 import { Document, Schema, model } from 'mongoose';
-import { IPatient } from './patient'; // Asegúrate de importar el modelo de paciente
+import { IPatient } from './patient';
+import { IUser } from './user';
 
 export interface IMedicalRest extends Document {
+  doctorId: IUser['_id'];
   patientId: IPatient['_id'];
   sintomas: string;
   fecha: Date;
@@ -9,11 +11,14 @@ export interface IMedicalRest extends Document {
   fecha_inicio: Date;
   fecha_final: Date;
   comentarios: string;
-  nombre_paciente?: string;
-  cedula_paciente?: string;
 }
 
 const medicalRestSchema = new Schema<IMedicalRest>({
+  doctorId: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
   patientId: {
     type: Schema.Types.ObjectId,
     ref: 'Patient',
@@ -42,12 +47,6 @@ const medicalRestSchema = new Schema<IMedicalRest>({
   comentarios: {
     type: String,
     required: true,
-  },
-  nombre_paciente: {
-    type: String,
-  },
-  cedula_paciente: {
-    type: String,
   },
 }, {
   versionKey: false,
