@@ -1,6 +1,8 @@
 import { model, Schema, Document } from 'mongoose';
 import { IPatient } from './patient';
 import { ITreatment } from './treatment';
+import { IUser } from './user';
+import { IExternalExam } from './externalExam';
 
 interface Ihabits {
   alcohol: string;
@@ -14,6 +16,7 @@ interface Ihabits {
 }
 
 export interface IMedicalRecord extends Document {
+  doctorId: IUser['_id'];
   patientId: IPatient['_id'];
   observaciones: string;
   ant_medicos: string;
@@ -21,10 +24,10 @@ export interface IMedicalRecord extends Document {
   ant_laborales: string;
   alergias: string;
   vacunas: string;
-  medicamentos: string; // cambiar a objeto o otra tabla de medicinas y separar de tratamientos
   enf_cronicas: string;
   habits: Ihabits;
   treatment: ITreatment['_id'];
+  externalExams: IExternalExam['_id'][];
 }
 
 const habitsSchema = new Schema<Ihabits>({
@@ -40,6 +43,11 @@ const habitsSchema = new Schema<Ihabits>({
 
 
 const medicalRecordSchema = new Schema({
+  doctorId: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
   patientId: {
     type: Schema.Types.ObjectId,
     ref: 'Patient',
@@ -75,11 +83,6 @@ const medicalRecordSchema = new Schema({
     required: false,
     trim: true,
   },
-  medicamentos: {
-    type: String,
-    required: false,
-    trim: true,
-  },
   enf_cronicas: {
     type: String,
     required: false,
@@ -94,6 +97,11 @@ const medicalRecordSchema = new Schema({
     ref: 'Treatment',
     required: false,
   },
+  externalExams: [{
+    type: Schema.Types.ObjectId,
+    ref: 'ExternalExam',
+    required: false,
+  }],
 },
 {
   timestamps: true,

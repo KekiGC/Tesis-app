@@ -6,19 +6,17 @@ import { uploadImage } from '../services/uploadFile.service';
 // Crear un nuevo examen externo
 export const createExternalExam = async (req: Request, res: Response): Promise<Response> => {
   try {
-    const { medicalRecord, type, description, date, path } = req.body;
+    const { type, description, date, path } = req.body;
 
     // Validar que todos los campos obligatorios estén presentes
-    if (!medicalRecord || !type || !date || !path) {
+    if (!type || !date) {
       return res.status(400).json({ msg: 'Please provide all required fields' });
     }
 
     const newExam = new ExternalExam({
-      medicalRecord,
       type,
       description,
       date,
-      path,
     });
 
     if (req.file) {
@@ -46,6 +44,19 @@ export const getExternalExam = async (req: Request, res: Response): Promise<Resp
     }
 
     return res.status(200).json(exam);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ msg: 'Internal server error' });
+  }
+};
+
+// Obtener todos los exámenes externos d
+export const getAllExternalExams = async (req: Request, res: Response): Promise<Response> => {
+  const { medicalRecordId } = req.params;
+  try {
+    const exams = await ExternalExam.find({ medicalRecord: medicalRecordId }).populate('medicalRecord');
+
+    return res.status(200).json(exams);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ msg: 'Internal server error' });

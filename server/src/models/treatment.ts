@@ -1,10 +1,5 @@
 import { model, Schema, Document } from 'mongoose';
-
-interface IMedicines {
-  name: string;
-  type: string;
-  use: string;
-}
+import { IMedicines } from './medicine';
 
 export interface ITreatment extends Document {
   medicines: IMedicines[];
@@ -13,17 +8,11 @@ export interface ITreatment extends Document {
   duration: string;
 }
 
-const medicinesSchema = new Schema<IMedicines>({
-  name: { type: String, required: true },
-  type: { type: String, required: true },
-  use: { type: String, required: true },
-});
-
 const treatmentSchema = new Schema({
-  medicines: [medicinesSchema],
+  medicines: [{ type: Schema.Types.ObjectId, ref: 'Medicine', required: false }],
   description: { type: String, required: true, trim: true },
-  dose: { type: String, required: true, trim: true },
-  duration: { type: String, required: true, trim: true },
+  dose: { type: String, required: false, trim: true },
+  duration: { type: String, required: false, trim: true },
 },
 {
     timestamps: true,

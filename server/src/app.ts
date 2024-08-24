@@ -19,6 +19,9 @@ import aptitudeRoutes from "./routes/aptitudeProof.routes";
 import companyRoutes from "./routes/company.routes";
 import reportRoutes from "./routes/report.routes";
 import examRoutes from "./routes/exam.routes";
+import externalExamRoutes from "./routes/externalExam.routes";
+import treatmentRoutes from "./routes/treatment.routes";
+import medicineRoutes from "./routes/medicine.routes";
 
 //inicio
 const app = express();
@@ -57,5 +60,8 @@ app.use(aptitudeRoutes);
 app.use(companyRoutes);
 app.use(reportRoutes);
 app.use(examRoutes);
+app.use(externalExamRoutes);
+app.use(treatmentRoutes);
+app.use(medicineRoutes);
 
 export default app;

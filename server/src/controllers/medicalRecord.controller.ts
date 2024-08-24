@@ -1,22 +1,25 @@
 import { Request, Response } from 'express';
 import MedicalRecord, { IMedicalRecord } from '../models/medicalRecord';
+import ExternalExam from '../models/externalExam';
 
 // obtener las historias clinicas de un paciente por su id
 export const getMedicalRecord = async (req: Request, res: Response): Promise<Response> => {
-  const { id } = req.params;
+  const { patientId } = req.params;
 
-  if (!id) {
-    return res.status(400).json({ msg: 'Please provide an id' });
+  if (!patientId) {
+    return res.status(400).json({ msg: 'Please provide the patient id' });
   }
 
   try {
-    const medicalRecords = await MedicalRecord.find({ patientId: id });
+    const medicalRecords = await MedicalRecord.find({ patientId: patientId }).populate('treatment').populate('externalExams').exec();
     return res.status(200).json(medicalRecords);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ msg: 'Internal server error' });
   }
 };
+
+
 
 // obtener una historia clinica por su id
 // export const getMedicalRecord = async (req: Request, res: Response): Promise<Response> => {
@@ -42,11 +45,11 @@ export const getMedicalRecord = async (req: Request, res: Response): Promise<Res
 
 // crear una historia clinica de un paciente
 export const createMedicalRecord = async (req: Request, res: Response): Promise<Response> => {
-  const { patientId, observaciones, ant_medicos, ant_familiares, ant_laborales, alergias, vacunas, medicamentos, enf_cronicas, empresa, grupoSanguineo, habits, treatment } = req.body;
+  const { patientId, doctorId, observaciones, ant_medicos, ant_familiares, ant_laborales, alergias, vacunas, enf_cronicas, habits, treatment, externalExams } = req.body;
 
   try {
-    if (!patientId) {
-      return res.status(400).json({ msg: 'Please provide the patient id' });
+    if (!patientId || !doctorId) {
+      return res.status(400).json({ msg: 'Please provide the patient and doctor id' });
     }
 
     const newMedicalRecord: IMedicalRecord = new MedicalRecord(req.body);

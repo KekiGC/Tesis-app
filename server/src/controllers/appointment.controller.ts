@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import Appointment, { IAppointment } from '../models/appointment';
 import Patient, { IPatient } from '../models/patient';
 import User, { IUser } from '../models/user';
@@ -41,7 +42,31 @@ export const getDoctorAppointments = async (req: Request, res: Response): Promis
   }
 
   try {
-    const appointments = await Appointment.find({ doctorId: doctorId }).sort({ date: 1 }).populate('patientId', 'name lastname').exec();
+    const appointments = await Appointment.aggregate([
+      { $match: { doctorId: new mongoose.Types.ObjectId(doctorId) } },  // Filter by doctorId
+      {
+        $addFields: {
+          sortOrder: {
+            $cond: {
+              if: { $eq: ["$status", "pending"] },
+              then: 1,
+              else: {
+                $cond: {
+                  if: { $eq: ["$status", "completed"] },
+                  then: 2,
+                  else: 3
+                }
+              }
+            }
+          }
+        }
+      },
+      { $sort: { sortOrder: 1, date: 1 } },  // Sort by custom order and then by date
+      { $lookup: { from: "patients", localField: "patientId", foreignField: "_id", as: "patient" } },  // Populate patient information
+      { $unwind: "$patient" },  // Convert the array result from $lookup into a single object
+      { $project: { "patient.name": 1, "patient.lastname": 1, date: 1, status: 1 } }  // Select fields to return
+    ]).exec();
+
     return res.status(200).json(appointments);
   } catch (error) {
     console.error(error);
@@ -51,7 +76,7 @@ export const getDoctorAppointments = async (req: Request, res: Response): Promis
 
 export const getFilteredAppointments = async (req: Request, res: Response): Promise<Response> => {
   const { doctorId } = req.params;
-  const { startTime, endTime, patientName } = req.query;
+  const { startTime, endTime, patientName, status } = req.query;
 
   if (!doctorId) {
     return res.status(400).json({ msg: 'Please provide an id' });
