@@ -22,6 +22,7 @@ import examRoutes from "./routes/exam.routes";
 import externalExamRoutes from "./routes/externalExam.routes";
 import treatmentRoutes from "./routes/treatment.routes";
 import medicineRoutes from "./routes/medicine.routes";
+import noteRoutes from "./routes/note.routes";
 
 //inicio
 const app = express();
@@ -63,5 +64,6 @@ app.use(examRoutes);
 app.use(externalExamRoutes);
 app.use(treatmentRoutes);
 app.use(medicineRoutes);
+app.use(noteRoutes);
 
 export default app;

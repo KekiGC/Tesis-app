@@ -16,7 +16,7 @@ export interface IExternalExam extends Document {
 
 const fileValidator = {
   validator: (v: string) => {
-    return v.includes('.jpg') || v.includes('.png') || v.includes('.jpeg') || v.includes('.pdf');
+    return v.includes('.jpg') || v.includes('.png') || v.includes('.jpeg') || v.includes('.pdf') || v.includes('.docx');
   },
   message: 'Invalid file extension',
 };
