@@ -5,6 +5,8 @@ import cors from "cors";
 import passport from "passport";
 import passportMiddleware from "./middlewares/passport";
 import path from "path";
+import cron from "node-cron";
+import { sendAppointmentReminders } from "./services/appointmentReminderJob";
 
 // Import routes
 import authRoutes from "./routes/auth.routes";
@@ -65,5 +67,7 @@ app.use(externalExamRoutes);
 app.use(treatmentRoutes);
 app.use(medicineRoutes);
 app.use(noteRoutes);
+
+cron.schedule('52 19 * * *', sendAppointmentReminders);
 
 export default app;

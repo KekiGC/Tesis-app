@@ -1,8 +1,8 @@
 import express, { Router } from 'express';
 import { 
     createMedicalRest, 
-    getAllMedicalRests, 
-     
+    getAllMedicalRests,
+    getMedicalRestById,
     deleteMedicalRest, 
 } from '../controllers/medicalRest.controller';
 
@@ -15,7 +15,7 @@ router.post('/create-medical-rest', createMedicalRest);
 router.get('/getall-medical-rest/:doctorId', getAllMedicalRests);
 
 // Ruta para obtener un reporte médico por su ID
-// router.get('/get-medical-rest/:id', getMedicalRestById);
+router.get('/get-medical-rest/:id', getMedicalRestById);
 
 // Ruta para eliminar un reporte médico
 router.delete('/delete-medical-rest/:id', deleteMedicalRest);

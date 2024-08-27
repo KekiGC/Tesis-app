@@ -71,6 +71,7 @@ export const createMedicalRest = async (req: Request, res: Response): Promise<Re
 
         // Enviar el PDF como respuesta
         res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=Reposo_medico_${patient.name}_${patient.lastname}.pdf`)
         return res.send(pdfBuffer);
 
     } catch (err) {
@@ -119,56 +120,67 @@ export const getAllMedicalRests = async (req: Request, res: Response): Promise<R
     }
 };
 
- 
+export const getMedicalRestById = async (req: Request, res: Response): Promise<Response> => {
+    const { id } = req.params;
 
-// export const getMedicalRestById = async (req: Request, res: Response): Promise<Response> => {
-//     const { id } = req.params;
+    try {
+        // Buscar el reporte médico por ID
+        const medicalRest = await MedicalRest.findById(id);
+        if (!medicalRest) {
+            return res.status(404).json({ msg: 'Medical rest not found' });
+        }
 
-//     try {
-//         // Buscar el reporte médico por ID
-//         const medicalRest = await MedicalRest.findById(id);
-//         if (!medicalRest) {
-//             return res.status(404).json({ msg: 'Medical rest not found' });
-//         }
+        // Buscar el paciente por ID
+        const patient = await Patient.findById(medicalRest.patientId);
+        if (!patient) {
+            return res.status(404).json({ msg: 'Patient not found' });
+        }
 
-//         // Buscar el paciente por ID
-//         const patient = await Patient.findById(medicalRest.patientId);
-//         if (!patient) {
-//             return res.status(404).json({ msg: 'Patient not found' });
-//         }
+        // Buscar el doctor por ID
+        const user = await User.findById(medicalRest.doctorId);
+        if (!user) {
+            return res.status(404).json({ msg: 'Doctor not found' });
+        }
 
-//         // Preparar los datos para el PDF
-//         const pdfData: DatosMedicos = {
-//             nombrePaciente: `${patient.name} ${patient.lastname}`,
-//             cedulaPaciente: patient.cedula,
-//             nombreDoctor: `${user.name} ${user.lastname}`,
-//             correoDoctor: user.email,
-//             direccionDoctor: userInfo.direccion,
-//             telefonoDoctor: userInfo.telefono,
-//             especialidadDoctor: userInfo.especialidad,
-//             inscripcionCMDoctor: userInfo.inscripcionCM,
-//             registroDoctor: userInfo.registro,
-//             firmaDoctor: userInfo.firma,
-//             sintomas: savedMedicalRest.sintomas,
-//             diagnostico: savedMedicalRest.diagnostico,
-//             fecha: new Date(savedMedicalRest.fecha),
-//             fechaInicio: new Date(savedMedicalRest.fecha_inicio),
-//             fechaFinal: new Date(savedMedicalRest.fecha_final),
-//             comentarios: savedMedicalRest.comentarios,
-//         };
+        // Buscar la información del doctor por ID
+        const userInfo = await UserInfo.findOne({ user: medicalRest.doctorId });
+        if (!userInfo) {
+            return res.status(404).json({ msg: 'Doctor info not found' });
+        }
 
-//         // Generar el PDF
-//         const pdfBuffer = generarPDF(pdfData);
+        // Preparar los datos para el PDF
+        const pdfData: DatosMedicos = {
+            nombrePaciente: `${patient.name} ${patient.lastname}`,
+            cedulaPaciente: patient.cedula,
+            nombreDoctor: `${user.name} ${user.lastname}`,
+            correoDoctor: user.email,
+            direccionDoctor: userInfo.direccion,
+            telefonoDoctor: userInfo.telefono,
+            especialidadDoctor: userInfo.especialidad,
+            inscripcionCMDoctor: userInfo.inscripcionCM,
+            registroDoctor: userInfo.registro,
+            firmaDoctor: userInfo.firma,
+            sintomas: medicalRest.sintomas,
+            diagnostico: medicalRest.diagnostico,
+            fecha: new Date(medicalRest.fecha),
+            fechaInicio: new Date(medicalRest.fecha_inicio),
+            fechaFinal: new Date(medicalRest.fecha_final),
+            comentarios: medicalRest.comentarios,
+        };
 
-//         // Enviar el PDF como respuesta
-//         res.setHeader('Content-Type', 'application/pdf');
-//         return res.send(pdfBuffer);
+        // Generar el PDF
+        const pdfBuffer = await generarPDF(pdfData);
 
-//     } catch (err) {
-//         console.error(err);
-//         return res.status(500).json({ msg: 'Internal server error' });
-//     }
-// };
+        // Enviar el PDF como respuesta
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=Reposo_medico_${patient.name}_${patient.lastname}.pdf`)
+        return res.send(pdfBuffer);
+
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ msg: 'Internal server error' });
+    }
+};
 
 
 // Eliminar un reporte médico por ID

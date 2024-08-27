@@ -7,7 +7,7 @@ import { generarPDFConstancia, DatosConstancia } from '../services/pdfApt.servic
 import { ICompany } from '../models/company';
 
 // obtener las pruebas de aptitud de un doctor
-export const getAptitudeProof = async (req: Request, res: Response): Promise<Response> => {
+export const getAptitudeProofs = async (req: Request, res: Response): Promise<Response> => {
   const { doctorId } = req.params;
 
   if (!doctorId) {
@@ -51,7 +51,48 @@ export const getAptitudeProofById = async (req: Request, res: Response): Promise
       return res.status(404).json({ msg: 'Aptitude proof not found' });
     }
 
-    return res.status(200).json(getAptProof);
+    const patient = await Patient.findById(getAptProof.patientId).populate('company').exec();
+    if (!patient) {
+      return res.status(404).json({ msg: 'Patient not found' });
+    }
+
+    const doctor = await User.findById(getAptProof.doctorId);
+    if (!doctor) {
+      return res.status(404).json({ msg: 'Doctor not found' });
+    }
+
+    const doctorInfo = await UserInfo.findOne({ user: getAptProof.doctorId });
+    if (!doctorInfo) {
+      return res.status(404).json({ msg: 'Doctor info not found' });
+    }
+
+    const company = patient.company as ICompany;
+
+    const pdfData: DatosConstancia = {
+      nombrePaciente: `${patient.name} ${patient.lastname}`,
+      cedulaPaciente: patient.cedula,
+      edadPaciente: patient.age,
+      fotoPaciente: patient.photo,
+      empresa: company.name, 
+      cargo: patient.position.description,
+      concepto: getAptProof.concepto,
+      clasificacion: getAptProof.clasificacion,
+      nombreDoctor: `${doctor.name} ${doctor.lastname}`,
+      correoDoctor: doctor.email,
+      especialidadDoctor: doctorInfo.especialidad,
+      direccionDoctor: doctorInfo.direccion,
+      telefonoDoctor: doctorInfo.telefono,
+      inscripcionCMDoctor: doctorInfo.inscripcionCM,
+      registroDoctor: doctorInfo.registro,
+      firmaDoctor: doctorInfo.firma,
+    };
+
+    const pdfBuffer = await generarPDFConstancia(pdfData);
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=Constancia_aptitud_${patient.name}_${patient.lastname}.pdf`)
+
+    return res.send(pdfBuffer);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ msg: 'Internal server error' });
@@ -119,7 +160,7 @@ export const createAptitudeProof = async (req: Request, res: Response): Promise<
 
     // Enviar el PDF como respuesta
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', 'inline; filename="constancia.pdf"');
+    res.setHeader('Content-Disposition', `attachment; filename=Constancia_aptitud_${patient.name}_${patient.lastname}.pdf`)
     return res.send(pdfBuffer);
 
   } catch (err) {

@@ -166,9 +166,10 @@ export const createAppointment = async (req: Request, res: Response): Promise<Re
     if (patient && doctor) {
       const emailSubject = 'Nueva cita médica';
       const emailText = `Hola ${patient.name},\n\nSe ha agendado una nueva cita con el doctor ${doctor.name} para el ${date} a las ${time}.\n\nMotivo: ${motive}\n\nSaludos,\nEquipo de salud`;
+      const doctorEmailText = `Hola Dr. ${doctor.name},\n\nSe ha agendado una nueva cita con el paciente ${patient.name} ${patient.lastname} para el ${date} a las ${time}.\n\nMotivo: ${motive}\n\nSaludos,\nEquipo de salud`;
 
       await sendEmail(patient.email, emailSubject, emailText);
-      await sendEmail(doctor.email, emailSubject, emailText);
+      await sendEmail(doctor.email, emailSubject, doctorEmailText);
     }
 
     return res.status(201).json(savedAppointment);

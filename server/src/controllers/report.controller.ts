@@ -3,32 +3,35 @@ import { DatosInforme, generarPDFInforme } from '../services/pdfReport.service';
 import report, { IReport } from '../models/report';
 import Patient from '../models/patient';
 import User from '../models/user';
-import userInfo from '../models/userInfo';
+import UserInfo from '../models/userInfo';
 
 export const createReport = async (req: Request, res: Response): Promise<Response> => {
-    const { patientId, doctorId, fecha_reporte, sintomas, hallazgos, examenes, diagnostico } = req.body;
+    const { cedulaPaciente, doctorId, fecha_reporte, sintomas, hallazgos, examenes, diagnostico } = req.body;
+    if (!cedulaPaciente || !doctorId || !fecha_reporte || !sintomas || !hallazgos || !examenes || !diagnostico) {
+        return res.status(400).json({ msg: 'Please provide all fields' });
+    }
     try {
-        if (!patientId || !doctorId || !fecha_reporte || !sintomas || !hallazgos || !examenes || !diagnostico) {
-            return res.status(400).json({ msg: 'Please provide all fields' });
+        const patient = await Patient.findOne({ cedula: cedulaPaciente });
+        if (!patient) {
+            return res.status(404).json({ msg: 'Patient not found' });
         }
 
-        const newReport: IReport = new report(req.body);
+        const newReport: IReport = new report({
+            patientId: patient._id,
+            doctorId,
+            fecha_reporte,
+            sintomas,
+            hallazgos,
+            examenes,
+            diagnostico,
+        });
         const savedReport = await newReport.save();
 
         const doctor = await User.findById(doctorId);
-        if (!doctor) {
-            throw new Error("Doctor no encontrado");
-        }
+        if (!doctor) return res.status(404).json({ message: 'Doctor not found' });
 
-        const doctorInfo = await userInfo.findOne({ user: doctorId });
-        if (!doctorInfo) {
-            throw new Error("Información del doctor no encontrada");
-        }
-        
-        const patient = await Patient.findById(patientId);
-        if (!patient) {
-            throw new Error("Paciente no encontrado");
-        }
+        const doctorInfo = await UserInfo.findOne({ user: doctorId });
+        if (!doctorInfo) return res.status(404).json({ message: 'Doctor info not found' });
 
         const pdfData: DatosInforme = {
             nombrePaciente: `${patient.name} ${patient.lastname}`,
@@ -51,7 +54,7 @@ export const createReport = async (req: Request, res: Response): Promise<Respons
         const pdfBuffer = await generarPDFInforme(pdfData);
 
         res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', 'attachment; filename="informe_medico.pdf"');
+        res.setHeader('Content-Disposition', `attachment; filename=informe_medico_${patient.name}_${patient.lastname}.pdf`)
 
         return res.send(pdfBuffer);
     } catch (err) {
@@ -100,7 +103,40 @@ export const getReport = async (req: Request, res: Response): Promise<Response> 
     try {
         const reportFound = await report.findById(req.params.id);
         if (!reportFound) return res.status(404).json({ message: 'Report not found' });
-        return res.status(200).json(reportFound);
+
+        const patient = await Patient.findById(reportFound.patientId);
+        if (!patient) return res.status(404).json({ message: 'Patient not found' });
+
+        const doctor = await User.findById(reportFound.doctorId);
+        if (!doctor) return res.status(404).json({ message: 'Doctor not found' });
+
+        const doctorInfo = await UserInfo.findOne({ user: reportFound.doctorId });
+        if (!doctorInfo) return res.status(404).json({ message: 'Doctor info not found' });
+
+        const pdfData: DatosInforme = {
+            nombrePaciente: `${patient.name} ${patient.lastname}`,
+            cedulaPaciente: patient.cedula,
+            nombreDoctor: `${doctor.name} ${doctor.lastname}`,
+            correoDoctor: doctor.email,
+            direccionDoctor: doctorInfo.direccion,
+            telefonoDoctor: doctorInfo.telefono,
+            especialidadDoctor: doctorInfo.especialidad,
+            inscripcionCMDoctor: doctorInfo.inscripcionCM,
+            registroDoctor: doctorInfo.registro,
+            firmaDoctor: doctorInfo.firma,
+            fechaReporte: new Date(reportFound.fecha_reporte).toLocaleDateString(),
+            sintomas: reportFound.sintomas,
+            hallazgos: reportFound.hallazgos,
+            examenes: reportFound.examenes,
+            diagnostico: reportFound.diagnostico,
+        };
+
+        const pdfBuffer = await generarPDFInforme(pdfData);
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=informe_medico_${patient.name}_${patient.lastname}.pdf`)
+    
+        return res.send(pdfBuffer);
     } catch (error) {
         return res.status(500).json(error);
     }

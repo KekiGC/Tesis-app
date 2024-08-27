@@ -99,8 +99,8 @@ export const generarPDF = async ({
     doc.setFont('Times', 'normal');
 
     const parrafo1 = `El Paciente ${nombrePaciente}, titular de la cédula: ${cedulaPaciente}, manifiesta que presenta los siguientes síntomas: ${sintomas}.`;
-    const parrafo2 = `En la evaluación de ingreso del ${fecha.toLocaleDateString()} se encontró y concluyó que el paciente posee ${diagnostico}. Se indicó tratamiento médico.`;
-    const parrafo4 = `Se indica reposo desde el ${fechaInicio.toLocaleDateString()} hasta el ${fechaFinal.toLocaleDateString()} debiendo ingresar el día ${fechaFinal.toLocaleDateString()}.`;
+    const parrafo2 = `En la evaluación de ingreso del ${fecha.toLocaleDateString('es-ES')} se encontró y concluyó que el paciente posee ${diagnostico}. Se indicó tratamiento médico.`;
+    const parrafo4 = `Se indica reposo desde el ${fechaInicio.toLocaleDateString('es-ES')} hasta el ${fechaFinal.toLocaleDateString('es-ES')} debiendo ingresar el día ${fechaFinal.toLocaleDateString('es-ES')}.`;
 
     let yOffset = 100;
     doc.text(parrafo1, 10, yOffset, { maxWidth: 180 });
