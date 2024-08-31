@@ -4,139 +4,237 @@ import path from 'path';
 import axios from 'axios';
 
 export interface DatosConstancia {
-    nombrePaciente: string;
-    cedulaPaciente: string;
-    edadPaciente: number;
-    fotoPaciente: string | null; // URL de la foto del paciente en Firebase
-    empresa: string;
-    cargo: string;
-    concepto: string;
-    clasificacion: string;
-    nombreDoctor: string;
-    correoDoctor: string;
-    especialidadDoctor: string;
-    direccionDoctor: string;
-    telefonoDoctor: string;
-    inscripcionCMDoctor: string;
-    registroDoctor: string;
-    firmaDoctor: string | null; // URL de la firma del doctor en Firebase
+  nombrePaciente: string;
+  apellidoPaciente: string;
+  cedulaPaciente: string;
+  edadPaciente: number;
+  fechaNacimientoPaciente: string;
+  sexoPaciente: string;
+  empresa: string;
+  cargo: string;
+  concepto: string;
+  clasificacion: string;
+  conclusiones: string;
+  observaciones: string;
+  nombreDoctor: string;
+  correoDoctor: string;
+  especialidadDoctor: string;
+  direccionDoctor: string;
+  telefonoDoctor: string;
+  inscripcionCMDoctor: string;
+  registroDoctor: string;
+  firmaDoctor: string | null; // URL de la firma del doctor en Firebase
 }
 
 export const generarPDFConstancia = async ({
-    nombrePaciente,
-    cedulaPaciente,
-    edadPaciente,
-    empresa,
-    cargo,
-    concepto,
-    clasificacion,
-    nombreDoctor,
-    correoDoctor,
-    especialidadDoctor,
-    direccionDoctor,
-    telefonoDoctor,
-    inscripcionCMDoctor,
-    registroDoctor,
-    firmaDoctor,
+  nombrePaciente,
+  apellidoPaciente,
+  cedulaPaciente,
+  edadPaciente,
+  fechaNacimientoPaciente,
+  sexoPaciente,
+  empresa,
+  cargo,
+  concepto,
+  clasificacion,
+  conclusiones,
+  observaciones,
+  nombreDoctor,
+  correoDoctor,
+  especialidadDoctor,
+  direccionDoctor,
+  telefonoDoctor,
+  inscripcionCMDoctor,
+  registroDoctor,
+  firmaDoctor,
 }: DatosConstancia): Promise<Buffer> => {
-    const doc = new jsPDF();
+  const doc = new jsPDF();
 
-    // Ruta de la imagen del esculapio
-    const esculapioImagePath = path.resolve(__dirname, '../../src/helpers/esculapio.png');
-    const esculapioImageBuffer = fs.readFileSync(esculapioImagePath);
+  // Ruta de la imagen del esculapio
+  const esculapioImagePath = path.resolve(
+    __dirname,
+    '../../src/helpers/esculapio.png'
+  );
+  const esculapioImageBuffer = fs.readFileSync(esculapioImagePath);
 
-    // Descarga la firma del doctor desde Firebase si existe
-    let firmaImageBuffer: Buffer | null = null;
-    if (firmaDoctor) {
-        const response = await axios.get(firmaDoctor, { responseType: 'arraybuffer' });
-        firmaImageBuffer = Buffer.from(response.data, 'binary');
-        console.log(`Descargando firma desde: ${firmaDoctor}`);
-    }
+  // Descarga la firma del doctor desde Firebase si existe
+  let firmaImageBuffer: Buffer | null = null;
+  if (firmaDoctor) {
+    const response = await axios.get(firmaDoctor, {
+      responseType: 'arraybuffer',
+    });
+    firmaImageBuffer = Buffer.from(response.data, 'binary');
+  }
 
-    // Configurar dimensiones y posiciones
-    const imageWidth = 50; // Ancho de la imagen del esculapio
-    const imageHeight = 50; // Altura de la imagen del esculapio
-    const pageWidth = doc.internal.pageSize.width;
-    const pageHeight = doc.internal.pageSize.height;
+  // Añadir la imagen del esculapio en la esquina superior izquierda
+  doc.addImage(esculapioImageBuffer.toString('binary'), 'PNG', 10, 10, 50, 50);
 
-    // Añadir la imagen del esculapio en la esquina superior izquierda
-    doc.addImage(esculapioImageBuffer.toString('binary'), 'PNG', 10, 10, imageWidth, imageHeight);
+  // Información del doctor a la derecha de la imagen
+  doc.setFontSize(20);
+  doc.setFont('Times', 'bold');
+  doc.text(`Dr. ${nombreDoctor}`, 80, 20);
+  doc.setFontSize(16);
+  doc.setFont('Times', 'normal');
+  doc.text(`${direccionDoctor}`, 80, 30);
+  doc.text(`Teléfono: ${telefonoDoctor}`, 80, 35);
+  doc.text(`${inscripcionCMDoctor}`, 80, 40);
+  doc.text(`${registroDoctor}`, 80, 45);
+  doc.text('Medicina del Trabajo e Higiene Industrial', 80, 50);
 
-    // Información del doctor a la derecha de la imagen
-    doc.setFontSize(20);
-    doc.setFont("Times", "bold");
-    doc.text(`Dr. ${nombreDoctor}`, 80, 20);
-    doc.setFontSize(16);
-    doc.setFont("Times", "normal");
-    doc.text(`${direccionDoctor}`, 80, 30);
-    doc.text(`Teléfono: ${telefonoDoctor}`, 80, 35);
-    doc.text(`${inscripcionCMDoctor}`, 80, 40);
-    doc.text(`${registroDoctor}`, 80, 45);
-    doc.text('Medicina del Trabajo e Higiene Industrial', 80, 50);
+  // Línea separadora
+  doc.setLineWidth(0.5);
+  doc.line(10, 60, doc.internal.pageSize.width - 10, 60); // Línea horizontal
 
-    // Línea separadora
-    doc.setLineWidth(0.5);
-    doc.line(10, 60, pageWidth - 10, 60); // Línea horizontal
+  // Título "SOLICITUD DE SERVICIO MÉDICO OCUPACIONAL"
+  doc.setFontSize(22);
+  doc.setFont('Times', 'bold');
+  doc.text(
+    'SOLICITUD DE SERVICIO MÉDICO OCUPACIONAL',
+    doc.internal.pageSize.width / 2,
+    70,
+    { align: 'center' }
+  );
 
-    // Título "CONSTANCIA DE APTITUD OCUPACIONAL" y Concepto
-    doc.setFontSize(22);
-    doc.setFont("Times", "bold");
-    const title = "CONSTANCIA DE APTITUD OCUPACIONAL";
-    doc.text(title, (pageWidth - doc.getTextWidth(title)) / 2, 70); // Se acortó la distancia desde el tope de la página
+  // Información del paciente
+  doc.setFontSize(14);
+  doc.setFont('Times', 'normal');
+  doc.text(`Empresa solicitante: ${empresa}`, 10, 85);
+  doc.text(`EXAMEN SOLICITADO: ${concepto}`, 10, 95);
 
-    doc.setFontSize(18); // Tamaño similar al título para el concepto
-    doc.text(`${concepto}`, (pageWidth - doc.getTextWidth(`${concepto}`)) / 2, 85); // Justo debajo del título
+  // checkbox para el concepto
+  const conceptcheckboxX = 65;
+  const conceptcheckboxY = 96;
+  doc.rect(conceptcheckboxX + 25, conceptcheckboxY - 5, 5, 5);
+  doc.text('X', conceptcheckboxX + 26, conceptcheckboxY - 1);
 
+  // Datos del trabajador
+  doc.setFont('Times', 'bold');
+  doc.setFontSize(16);
+  doc.text('DATOS DEL TRABAJADOR', doc.internal.pageSize.width / 2, 110, {
+    align: 'center',
+  });
 
-    // Información de la constancia
-    doc.setFontSize(12);
-    doc.setFont("Times", "normal");
+  // Draw underline
+  const textWidth = doc.getTextWidth('DATOS DEL TRABAJADOR');
+  doc.setLineWidth(0.5);
+  doc.line(
+    (doc.internal.pageSize.width - textWidth) / 2,
+    112,
+    (doc.internal.pageSize.width + textWidth) / 2,
+    112
+  );
 
-    const parrafo1 = `El paciente ${nombrePaciente}, titular de la cédula: ${cedulaPaciente}, con edad ${edadPaciente} años, trabaja en la empresa ${empresa} desempeñando el cargo de ${cargo}.`;
-    const parrafo2 = `Clasificación: ${clasificacion}`;
+  // Two-column layout for worker data
+  const leftColumnX = 10;
+  const rightColumnX = 105;
+  let rowY = 120;
 
-    let yOffset = 105; // Ajuste para reducir la separación entre título y contenido
-    doc.text(parrafo1, 10, yOffset, { maxWidth: 180 });
-    yOffset += 15; // Espacio entre párrafos
-    doc.text(parrafo2, 10, yOffset, { maxWidth: 180 });
+  doc.setFontSize(12);
+  doc.setFont('Times', 'bold');
+  doc.text('Nombres:', leftColumnX, rowY);
+  doc.setFont('Times', 'normal');
+  doc.text(nombrePaciente, leftColumnX + 20, rowY);
 
-    // Configuración del rectángulo con borde negro para la firma
-    const firmaWidth = 50; // Ancho de la imagen de la firma
-    const firmaHeight = 20; // Altura de la imagen de la firma
-    const rectWidth = firmaWidth + 10; // Ancho del rectángulo (con margen)
-    const rectHeight = firmaHeight + 10; // Altura del rectángulo (con margen)
-    const rectX = (pageWidth - rectWidth) / 2; // Posición X del rectángulo
-    const rectY = pageHeight - rectHeight - 90; // Posición Y del rectángulo
+  doc.setFont('Times', 'bold');
+  doc.text('Apellidos:', rightColumnX, rowY);
+  doc.setFont('Times', 'normal');
+  doc.text(apellidoPaciente, rightColumnX + 20, rowY);
 
-    // Dibujar el rectángulo con borde negro y sin relleno
-    doc.setDrawColor(0, 0, 0); // Color del borde (negro)
-    doc.setFillColor(255, 255, 255); // Color de relleno (blanco, para que sea transparente)
-    doc.rect(rectX, rectY, rectWidth, rectHeight, 'D'); // 'D' dibuja solo el borde
+  rowY += 10;
+  doc.setFont('Times', 'bold');
+  doc.text('Fecha de Nacimiento:', leftColumnX, rowY);
+  doc.setFont('Times', 'normal');
+  doc.text(fechaNacimientoPaciente, leftColumnX + 41, rowY);
 
-    // Añadir la imagen de la firma dentro del rectángulo, si existe
-    if (firmaImageBuffer) {
-        doc.addImage(firmaImageBuffer.toString('binary'), 'PNG', rectX + 5, rectY + 5, firmaWidth, firmaHeight); // Centrar la imagen dentro del rectángulo
-    }
+  doc.setFont('Times', 'bold');
+  doc.text('Edad:', rightColumnX, rowY);
+  doc.setFont('Times', 'normal');
+  doc.text(`${edadPaciente.toString()} años`, rightColumnX + 14, rowY);
 
-    // Texto debajo del rectángulo
-    doc.setFontSize(12);
-    doc.setFont('Times', 'normal');
-    const firmaTexto = `Dr. ${nombreDoctor}`;
-    const firmaTextoX = rectX + rectWidth / 2 - 20; // Mover el texto 20 unidades a la izquierda
-    doc.text(firmaTexto, firmaTextoX, rectY + rectHeight + 10);
+  rowY += 10;
+  doc.setFont('Times', 'bold');
+  doc.text('Cédula de Identidad:', leftColumnX, rowY);
+  doc.setFont('Times', 'normal');
+  doc.text(cedulaPaciente, leftColumnX + 40, rowY);
 
-    // Agregar línea de separación
-    doc.setLineWidth(0.2); // Ancho de la línea, puedes ajustar este valor para hacer la línea más gruesa o más delgada
-    doc.line(10, pageHeight - 20, pageWidth - 10, pageHeight - 20); // Dibuja una línea horizontal
+  doc.setFont('Times', 'bold');
+  doc.text('Sexo:', rightColumnX, rowY);
+  doc.setFont('Times', 'normal');
+  doc.text(
+    sexoPaciente === 'male' ? 'Masculino' : 'Femenino',
+    rightColumnX + 14,
+    rowY
+  );
 
-    // Texto en el pie de página
-    doc.setFontSize(10);
-    const footerText = `Dr. ${nombreDoctor}, ${especialidadDoctor}, Email: ${correoDoctor}`;
-    const footerTextWidth = (doc.getStringUnitWidth(footerText) * 10) / 72;
-    doc.text(footerText, 10, pageHeight - 10); // El primer parámetro define la posición X (a la izquierda)
+  rowY += 10;
+  doc.setFont('Times', 'bold');
+  doc.text('Cargo/Puesto que aspira:', leftColumnX, rowY);
+  doc.setFont('Times', 'normal');
+  doc.text(cargo, leftColumnX + 50, rowY);
 
+  // Checkboxes for classification
+  const checkboxX = 10;
+  let checkboxY = 165;
+  doc.setFont('Times', 'normal');
+  doc.text('RESULTADOS:', checkboxX, checkboxY);
 
-    // Convertir el PDF a un buffer
-    const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
-    return pdfBuffer;
+  // Checkbox for "Apto para Trabajar"
+  checkboxY += 10; // Move Y position down for the first checkbox
+  doc.rect(checkboxX + 25, checkboxY - 5, 5, 5);
+  if (clasificacion === 'Apto') doc.text('X', checkboxX + 26, checkboxY - 1); // Mark checkbox if applicable
+  doc.text('Apto para Trabajar', checkboxX + 35, checkboxY);
+
+  // Checkbox for "No Apto"
+  checkboxY += 10; // Move Y position down for the second checkbox
+  doc.rect(checkboxX + 25, checkboxY - 5, 5, 5);
+  if (clasificacion === 'No apto') doc.text('X', checkboxX + 26, checkboxY - 1); // Mark checkbox if applicable
+  doc.text('No Apto para el puesto solicitado', checkboxX + 35, checkboxY);
+
+  // Conclusion section
+  doc.text('OBSERVACIONES:', 10, checkboxY + 10);
+  doc.setFont('Times', 'normal');
+  doc.text(observaciones, 10, checkboxY + 20);
+
+  doc.text('CONCLUSIONES:', 10, checkboxY + 30);
+  doc.setFont('Times', 'normal');
+  doc.text(conclusiones, 10, checkboxY + 40);
+
+  // Firma del doctor
+  const pageWidth = doc.internal.pageSize.width;
+  const firmaWidth = 50;
+  const firmaX = (pageWidth - firmaWidth) / 2;
+  const firmaY = doc.internal.pageSize.height - 60; // Adjust Y position to move signature up
+
+  // Add signature image above the text
+  if (firmaImageBuffer) {
+    doc.addImage(
+      firmaImageBuffer.toString('binary'),
+      'PNG',
+      firmaX,
+      firmaY,
+      firmaWidth,
+      25
+    );
+  }
+
+  // Centrar el texto "Firma y Sello del Médico Ocupacional"
+  doc.setFontSize(12);
+  const textFirmaSello = 'Firma y Sello del Médico Ocupacional';
+  const textFirmaSelloWidth = doc.getTextWidth(textFirmaSello);
+  const textFirmaSelloX = (pageWidth - textFirmaSelloWidth) / 2;
+  doc.text(textFirmaSello, textFirmaSelloX, firmaY + 32);
+
+  // Centrar el nombre del doctor
+  const textDoctor = `Dr. ${nombreDoctor}`;
+  const textDoctorWidth = doc.getTextWidth(textDoctor);
+  const textDoctorX = (pageWidth - textDoctorWidth) / 2;
+  doc.text(textDoctor, textDoctorX, firmaY + 40);
+
+  // Subrayar la firma
+  doc.setLineWidth(0.5);
+  doc.line(firmaX, firmaY + 25, firmaX + firmaWidth, firmaY + 25); // Línea horizontal bajo la firma
+
+  // Convertir el PDF a un buffer
+  const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
+  return pdfBuffer;
 };

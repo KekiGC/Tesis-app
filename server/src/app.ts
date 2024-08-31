@@ -68,6 +68,6 @@ app.use(treatmentRoutes);
 app.use(medicineRoutes);
 app.use(noteRoutes);
 
-cron.schedule('52 19 * * *', sendAppointmentReminders);
+cron.schedule('0 17 * * *', sendAppointmentReminders);
 
 export default app;

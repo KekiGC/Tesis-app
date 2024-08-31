@@ -19,29 +19,22 @@ export const getMedicalRecord = async (req: Request, res: Response): Promise<Res
   }
 };
 
+// obtener todas las historias de un doctor
+export const getAllMedicalRecords = async (req: Request, res: Response): Promise<Response> => {
+  const { doctorId } = req.params;
 
+  if (!doctorId) {
+    return res.status(400).json({ msg: 'Please provide the doctor id' });
+  }
 
-// obtener una historia clinica por su id
-// export const getMedicalRecord = async (req: Request, res: Response): Promise<Response> => {
-//   const { id } = req.params;
-
-//   if (!id) {
-//     return res.status(400).json({ msg: 'Please provide an id' });
-//   }
-
-//   try {
-//     const medicalRecord = await MedicalRecord.findById(id);
-
-//     if (!medicalRecord) {
-//       return res.status(404).json({ msg: 'Medical record not found' });
-//     }
-
-//     return res.status(200).json(medicalRecord);
-//   } catch (error) {
-//     console.error(error);
-//     return res.status(500).json({ msg: 'Internal server error' });
-//   }
-// };
+  try {
+    const medicalRecords = await MedicalRecord.find({ doctorId: doctorId }).populate('patientId').exec();
+    return res.status(200).json(medicalRecords);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ msg: 'Internal server error' });
+  }
+};
 
 // crear una historia clinica de un paciente
 export const createMedicalRecord = async (req: Request, res: Response): Promise<Response> => {

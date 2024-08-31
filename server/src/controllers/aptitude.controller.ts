@@ -69,14 +69,18 @@ export const getAptitudeProofById = async (req: Request, res: Response): Promise
     const company = patient.company as ICompany;
 
     const pdfData: DatosConstancia = {
-      nombrePaciente: `${patient.name} ${patient.lastname}`,
+      nombrePaciente: patient.name,
+      apellidoPaciente: patient.lastname,
       cedulaPaciente: patient.cedula,
       edadPaciente: patient.age,
-      fotoPaciente: patient.photo,
+      sexoPaciente: patient.gender,
+      fechaNacimientoPaciente: patient.birthdate.toLocaleDateString('es-ES'),
       empresa: company.name, 
       cargo: patient.position.description,
       concepto: getAptProof.concepto,
       clasificacion: getAptProof.clasificacion,
+      observaciones: getAptProof.observaciones,
+      conclusiones: getAptProof.conclusiones,
       nombreDoctor: `${doctor.name} ${doctor.lastname}`,
       correoDoctor: doctor.email,
       especialidadDoctor: doctorInfo.especialidad,
@@ -101,7 +105,7 @@ export const getAptitudeProofById = async (req: Request, res: Response): Promise
 
 // crear una prueba de aptitud
 export const createAptitudeProof = async (req: Request, res: Response): Promise<Response> => {
-  const { cedulaPaciente, doctorId, concepto, clasificacion } = req.body;
+  const { cedulaPaciente, doctorId, concepto, clasificacion, observaciones, conclusiones } = req.body;
 
   try {
     if (!cedulaPaciente || !doctorId || !concepto || !clasificacion) {
@@ -131,20 +135,26 @@ export const createAptitudeProof = async (req: Request, res: Response): Promise<
       doctorId,
       concepto,
       clasificacion,
+      observaciones,
+      conclusiones,
     });
 
     const savedAptitudeProof = await newAptitudeProof.save();
 
     //preparar los datos para el pdf
     const pdfData: DatosConstancia = {
-      nombrePaciente: `${patient.name} ${patient.lastname}`,
+      nombrePaciente: patient.name,
+      apellidoPaciente: patient.lastname,
       cedulaPaciente: patient.cedula,
       edadPaciente: patient.age,
-      fotoPaciente: patient.photo,
+      sexoPaciente: patient.gender,
+      fechaNacimientoPaciente: patient.birthdate.toLocaleDateString('es-ES'),
       empresa: company.name, 
       cargo: patient.position.description,
       concepto: savedAptitudeProof.concepto,
       clasificacion: savedAptitudeProof.clasificacion,
+      observaciones: savedAptitudeProof.observaciones,
+      conclusiones: savedAptitudeProof.conclusiones,
       nombreDoctor: `${doctor.name} ${doctor.lastname}`,
       correoDoctor: doctor.email,
       especialidadDoctor: doctorInfo.especialidad,
