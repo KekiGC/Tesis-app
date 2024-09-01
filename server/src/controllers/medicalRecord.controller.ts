@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import MedicalRecord, { IMedicalRecord } from '../models/medicalRecord';
-import ExternalExam from '../models/externalExam';
 
 // obtener las historias clinicas de un paciente por su id
 export const getMedicalRecord = async (req: Request, res: Response): Promise<Response> => {
