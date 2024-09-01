@@ -6,12 +6,9 @@ export interface IAptitudeProof extends Document {
     patientId: IPatient['_id'];
     doctorId: IUser['_id'];
     concepto: string;
-    name: string;
-    cedula: string;
-    edad: number;
-    empresa: string;
-    cargo: string;
     clasificacion: string;
+    conclusiones: string;
+    observaciones: string;
 }
 
 const aptitudeProofSchema = new Schema({
@@ -27,39 +24,25 @@ const aptitudeProofSchema = new Schema({
     },
     concepto: {
         type: String,
-        enum: ['preempleo', 'prevacacional', 'postvacacional', 'retiro'],
-        required: true,
-        trim: true,
-    },
-    name: {
-        type: String,
-        required: true,
-        trim: true,
-    },
-    cedula: {
-        type: String,
-        required: true,
-        trim: true,
-    },
-    edad: {
-        type: Number,
-        required: true,
-    },
-    empresa: {
-        type: String,
-        required: true,
-        trim: true,
-    },
-    cargo: {
-        type: String,
+        enum: ['Preempleo', 'Prevacacional', 'Postvacacional', 'Retiro'],
         required: true,
         trim: true,
     },
     clasificacion: {
         type: String,
-        enum: ['apto', 'no apto'],
+        enum: ['Apto', 'No apto'],
         required: true,
         trim: true,
+    },
+    conclusiones: {
+        type: String,
+        trim: true,
+        required: false,
+    },
+    observaciones: {
+        type: String,
+        trim: true,
+        required: false,
     },
 },
 {

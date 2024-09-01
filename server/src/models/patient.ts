@@ -1,19 +1,34 @@
 import { model, Schema, Document } from 'mongoose';
 import { IUser } from './user';
+import { ICompany } from './company';
 
+interface IPosition {
+    description: string;
+} 
 export interface IPatient extends Document {
   email: string;
   name: string;
   lastname: string;
   doctorId: IUser['_id'];
-  profileImg: string | null;
+  age: number;
+  cedula: string;
+  photo: string | null;
   gender: string;
   birthdate: Date;
   phone: string;
   address: string;
-  empresa: string;
+  company: ICompany['_id'];
   grupoSanguineo: string;
+  position: IPosition;
 }
+
+const positionSchema = new Schema({
+    description: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+});
 
 const patientSchema = new Schema({
     email: {
@@ -38,7 +53,17 @@ const patientSchema = new Schema({
         ref: 'User',
         required: true,
     },
-    profileImg: {
+    age: {
+        type: Number,
+        required: true,
+    },
+    cedula: {
+        type: String,
+        required: true,
+        trim: true,
+        unique: true,
+    },
+    photo: {
         type: String,
         required: false,
         trim: true,
@@ -63,16 +88,20 @@ const patientSchema = new Schema({
         required: true,
         trim: true,
     },
-    empresa: {
-        type: String,
+    company: {
+        type: Schema.Types.ObjectId,
+        ref: 'Company',
         required: true,
-        trim: true,
     },
     grupoSanguineo: {
         type: String,
         enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
         required: true,
         trim: true,
+    },
+    position: {
+        type: positionSchema,
+        required: true,
     },
 },
     {

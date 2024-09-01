@@ -1,5 +1,6 @@
 import { model, Schema, Document } from 'mongoose';
 import { IPatient } from './patient';
+import { IUser } from './user';
 
 interface IVitalSigns {
     FC: number; // Frecuencia Cardíaca
@@ -9,6 +10,7 @@ interface IVitalSigns {
 
 export interface IExam extends Document {
     patientId: IPatient['_id'];
+    doctorId: IUser['_id'];
     impresion_general: string;
     peso: number;
     talla_cms: number;
@@ -22,6 +24,7 @@ export interface IExam extends Document {
     hernia_inguinal: string;
     sist_nervioso: string;
     osteomioarticular: string;
+    vitalSigns: IVitalSigns;    
 }
 
 const VitalSignsSchema = new Schema<IVitalSigns>({
@@ -34,6 +37,11 @@ const examSchema = new Schema({
     patientId: {
         type: Schema.Types.ObjectId,
         ref: 'Patient',
+        required: true,
+    },
+    doctorId: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
         required: true,
     },
     impresion_general: {
