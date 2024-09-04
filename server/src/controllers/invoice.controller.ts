@@ -1,6 +1,10 @@
 import { Request, Response } from 'express';
 import Invoice from '../models/invoice';
 import Counter from '../models/counter';
+import UserInfo from '../models/userInfo';
+import User from '../models/user';
+import Patient from '../models/patient';
+import { DatosFactura, generarFactura } from '../services/pdfInvoice.service';
 
 // crear factura
 export const createInvoice = async (
@@ -45,20 +49,65 @@ export const createInvoice = async (
     });
 
     const savedInvoice = await newInvoice.save();
-    return res.status(201).json(savedInvoice);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ msg: 'Internal server error' });
-  }
+
+    // Obtener información del doctor
+    const doctor = await User.findById(doctorId);
+    if (!doctor) return res.status(404).json({ message: 'Doctor not found' });
+
+    const doctorInfo = await UserInfo.findOne({ user: doctorId });
+    if (!doctorInfo) return res.status(404).json({ message: 'Doctor info not found' });
+
+    // Obtener información del paciente
+    const patient = await Patient.findById(patientId);
+    if (!patient) return res.status(404).json({ message: 'Patient not found' });
+
+    const pdfData: DatosFactura = {
+      nombrePaciente: `${patient.name} ${patient.lastname}`,
+      cedulaPaciente: patient.cedula,
+      nombreDoctor: `${doctor.name} ${doctor.lastname}`,
+      direccionDoctor: doctorInfo.direccion,
+      telefonoDoctor: doctorInfo.telefono,
+      especialidadDoctor: doctorInfo.especialidad,
+      inscripcionCMDoctor: doctorInfo.inscripcionCM,
+      registroDoctor: doctorInfo.registro,
+      firmaDoctor: doctorInfo.firma,
+      fechaFactura: new Date(savedInvoice.fecha).toLocaleDateString('es-ES'),
+      numeroControl: savedInvoice.numero_control,
+      nombreRazon: savedInvoice.nombre_razon,
+      dirFiscal: savedInvoice.dir_fiscal,
+      rif: savedInvoice.rif,
+      formaPago: savedInvoice.forma_pago,
+      contacto: savedInvoice.contacto,
+      descripcionServicio: savedInvoice.descripcion_servicio,
+      total: savedInvoice.total,
+    };
+
+    const pdfBuffer = await generarFactura(pdfData);
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=factura_${patient.name}_${patient.lastname}.pdf`);
+
+    return res.send(pdfBuffer);
+  } catch (err) {
+    if ((err as any).name === 'ValidationError') {
+        const validationErrors = Object.values((err as any).errors).map((e: any) => e.message);
+        return res.status(400).json({ msg: 'Validation error', errors: validationErrors });
+    } else if ((err as any).code === 11000) {
+        return res.status(400).json({ msg: 'Duplicate key error' });
+    } else {
+        console.error(err);
+        return res.status(500).json({ msg: 'Internal server error' });
+    }
+}
 };
 
-// obtener facturas
+// obtener facturas del doctor (usuario)
 export const getInvoices = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
   try {
-    const invoices = await Invoice.find().populate('patientId', 'name lastname cedula').populate('doctorId', 'name lastname');
+    const invoices = await Invoice.find({ doctorId: req.params.doctorId }).populate('patientId', 'name lastname cedula').populate('doctorId', 'name lastname');
     return res.status(200).json(invoices);
   } catch (error) {
     console.error(error);
@@ -72,12 +121,18 @@ export const getInvoice = async (
   res: Response
 ): Promise<Response> => {
   try {
-    const invoice = await Invoice.findById(req.params.id).populate('patientId', 'name lastname cedula').populate('doctorId', 'name lastname');
+    const invoice = await Invoice.findById(req.params.id)
+      .populate('patientId', 'name lastname cedula')
+      .populate({
+        path: 'doctorId',
+        select: 'name lastname'
+      });
+
     return res.status(200).json(invoice);
-    } catch (error) {
+  } catch (error) {
     console.error(error);
     return res.status(500).json({ msg: 'Internal server error' });
-    }
+  }
 }
 
 // eliminar factura

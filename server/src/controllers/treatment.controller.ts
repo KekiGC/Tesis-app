@@ -3,9 +3,9 @@ import Treatment from '../models/treatment';
 import Medicine from '../models/medicine';
 
 export const createTreatment = async (req: Request, res: Response): Promise<Response> => {
-    const { medicines, description, dose, duration } = req.body;
+    const { medicines, description, dose, duration, medicalRecord } = req.body;
     try {
-        if (!description) {
+        if (!description || !medicalRecord) {
             return res.status(400).json({ msg: 'Please provide all fields' });
         }
 
@@ -27,8 +27,9 @@ export const createTreatment = async (req: Request, res: Response): Promise<Resp
 };
 
 export const getTreatments = async (req: Request, res: Response): Promise<Response> => {
+    const { medicalRecordId } = req.params;
     try {
-        const treatments = await Treatment.find().populate('medicines').exec();
+        const treatments = await Treatment.find({ medicalRecord: medicalRecordId }).populate('medicines').exec();
         return res.status(200).json(treatments);
     } catch (error) {
         return res.status(500).json(error);
@@ -62,6 +63,23 @@ export const updateTreatment = async (req: Request, res: Response): Promise<Resp
         }
 
         return res.status(200).json(updatedTreatment);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ msg: 'Internal server error' });
+    }
+};
+
+// eliminar tratamiento
+export const deleteTreatment = async (req: Request, res: Response): Promise<Response> => {
+    const { id } = req.params;
+
+    if (!id) {
+        return res.status(400).json({ msg: 'Please provide an id' });
+    }
+
+    try {
+        await Treatment.findByIdAndDelete(id);
+        return res.status(204).json();
     } catch (error) {
         console.error(error);
         return res.status(500).json({ msg: 'Internal server error' });
