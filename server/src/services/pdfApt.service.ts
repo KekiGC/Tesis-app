@@ -102,7 +102,7 @@ export const generarPDFConstancia = async ({
   doc.text(`EXAMEN SOLICITADO: ${concepto}`, 10, 95);
 
   // checkbox para el concepto
-  const conceptcheckboxX = 65;
+  const conceptcheckboxX = 75;
   const conceptcheckboxY = 96;
   doc.rect(conceptcheckboxX + 25, conceptcheckboxY - 5, 5, 5);
   doc.text('X', conceptcheckboxX + 26, conceptcheckboxY - 1);
