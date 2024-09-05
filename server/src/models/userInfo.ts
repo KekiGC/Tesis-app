@@ -20,7 +20,7 @@ const userInfoSchema = new Schema<IUserInfo>({
     cedula: { type: String, required: true, trim: true },
     inscripcionCM: { type: String, required: true, trim: true },
     registro: { type: String, required: true, trim: true },
-    firma: { type: String, required: true, trim: true }
+    firma: { type: String, required: false, trim: true }
 }, {
     timestamps: true,
     versionKey: false,
