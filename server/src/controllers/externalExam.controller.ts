@@ -1,15 +1,14 @@
 import { Request, Response } from 'express';
 import ExternalExam from '../models/externalExam';
-import MedicalRecord from '../models/medicalRecord';
 import { uploadImage } from '../services/uploadFile.service';
 
 // Crear un nuevo examen externo
 export const createExternalExam = async (req: Request, res: Response): Promise<Response> => {
   try {
-    const { type, description, date, path } = req.body;
+    const { type, description, date, path, medicalRecord } = req.body;
 
     // Validar que todos los campos obligatorios estén presentes
-    if (!type || !date) {
+    if (!type || !date || !medicalRecord) {
       return res.status(400).json({ msg: 'Please provide all required fields' });
     }
 
@@ -17,6 +16,7 @@ export const createExternalExam = async (req: Request, res: Response): Promise<R
       type,
       description,
       date,
+      medicalRecord,
     });
 
     if (req.file) {
@@ -37,7 +37,7 @@ export const createExternalExam = async (req: Request, res: Response): Promise<R
 export const getExternalExam = async (req: Request, res: Response): Promise<Response> => {
   try {
     const { id } = req.params;
-    const exam = await ExternalExam.findById(id).populate('medicalRecord');
+    const exam = await ExternalExam.findById(id);
 
     if (!exam) {
       return res.status(404).json({ msg: 'Exam not found' });
@@ -54,7 +54,7 @@ export const getExternalExam = async (req: Request, res: Response): Promise<Resp
 export const getAllExternalExams = async (req: Request, res: Response): Promise<Response> => {
   const { medicalRecordId } = req.params;
   try {
-    const exams = await ExternalExam.find({ medicalRecord: medicalRecordId }).populate('medicalRecord');
+    const exams = await ExternalExam.find({ medicalRecord: medicalRecordId });
 
     return res.status(200).json(exams);
   } catch (error) {

@@ -81,31 +81,36 @@ export const createPatient = async (req: Request, res: Response): Promise<Respon
 };
 
 export const updatePatient = async (req: Request, res: Response): Promise<Response> => {
-    try {
-      let photoUrl = null;
-      if (req.file) {
-        console.log('Archivo recibido:', req.file.originalname)
-        const file = req.file as Express.Multer.File;
-        photoUrl = await uploadImage(file, 'pacientes');
-        console.log('firma subida a Firebase:', photoUrl);
-      } else {
-        console.log('No se recibió archivo');
-      }
-
-        const updatedPatient = await Patient.findByIdAndUpdate(req.params.id, {
-            ...req.body,
-            photo: photoUrl,
-        }, 
-        { new: true });
-
-        if (!updatedPatient) {
-            return res.status(404).json({ error: 'Patient not found' });
-        }
-
-        return res.status(200).json(updatedPatient);
-    } catch (error) {
-        return res.status(500).json({ error: 'Error updating the patient information' });
+  try {
+    let photoUrl = null;
+    if (req.file) {
+      console.log('Archivo recibido:', req.file.originalname);
+      const file = req.file as Express.Multer.File;
+      photoUrl = await uploadImage(file, 'pacientes');
+      console.log('foto subida a Firebase:', photoUrl);
+    } else {
+      console.log('No se recibió archivo');
     }
+
+    // Buscar el paciente actual para combinar los datos
+    const existingPatient = await Patient.findById(req.params.id);
+    if (!existingPatient) {
+      return res.status(404).json({ error: 'Patient not found' });
+    }
+
+    // Combinar los datos existentes con los nuevos, manteniendo los campos originales si no se envían en req.body
+    const updatedData = {
+      ...existingPatient.toObject(),  // convertir el documento Mongoose a objeto
+      ...req.body,
+      photo: photoUrl || existingPatient.photo,  // solo actualizar la foto si se envía una nueva
+    };
+
+    const updatedPatient = await Patient.findByIdAndUpdate(req.params.id, updatedData, { new: true });
+
+    return res.status(200).json(updatedPatient);
+  } catch (error) {
+    return res.status(500).json({ error: 'Error updating the patient information' });
+  }
 };
 
 export const deletePatient = async (req: Request, res: Response): Promise<Response> => {

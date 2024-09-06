@@ -1,4 +1,5 @@
 import { Schema, model, Document } from 'mongoose';
+import { IMedicalRecord } from './medicalRecord';
 import dotenv from 'dotenv';
 
 // Load environment variables
@@ -8,6 +9,7 @@ dotenv.config();
 const EXAM_TYPES = process.env.EXAM_TYPES?.split(',') || ['Radiografia', 'Pruebas de sangre', 'Ultrasonido', 'Tomografía', 'Resonancia magnética'];
 
 export interface IExternalExam extends Document {
+  medicalRecord: IMedicalRecord['_id'];
   type: string;
   description: string;
   date: Date;
@@ -22,6 +24,11 @@ const fileValidator = {
 };
 
 const externalExamSchema = new Schema<IExternalExam>({
+  medicalRecord: {
+    type: Schema.Types.ObjectId,
+    ref: 'MedicalRecord',
+    required: true,
+  },
   type: {
     type: String,
     enum: EXAM_TYPES,
