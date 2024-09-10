@@ -7,7 +7,7 @@
     "start": "node dist/index.js",
     "build": "tsc",
     "prestart": "npm run build",
-    "postbuild": "copyfiles -u 1 src/views/**/* dist/views"
+    "postbuild": "copyfiles -u 2 src/views/**/* dist/views"
   },
   "keywords": [],
   "author": "",
