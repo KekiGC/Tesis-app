@@ -144,7 +144,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<Respo
     await user.save();
 
     // Crear el enlace de restablecimiento
-    const resetUrl = `http://${req.headers.host}/reset-password/${resetToken}`;
+    const resetUrl = `https://${req.headers.host}/reset-password/${resetToken}`;
 
     // Contenido del correo electrónico
     const emailContent = `Usted ha solicitado restablecer su contraseña.\n\n
